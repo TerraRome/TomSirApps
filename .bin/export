@@ -1,0 +1,134 @@
+#!/bin/bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+ROOT_DIR="$( cd "$SCRIPT_DIR/.." &> /dev/null && pwd )"
+CONFIG_DIR="$( cd "$ROOT_DIR/__config__" &> /dev/null && pwd )"
+ANDROID_DIR="$( cd "$ROOT_DIR/android" &> /dev/null && pwd )"
+IOS_DIR="$( cd "$ROOT_DIR/ios" &> /dev/null && pwd )"
+
+with_timestamps() {
+    while read -r line; do
+        echo -e "$(date +%T)\t$line"
+    done
+}
+
+
+function copy_and_replace {
+  ENV=$1
+  echo "copy $SCRIPT_DIR/config-$ENV/* to $CONFIG_DIR"
+  yes | cp -r $SCRIPT_DIR/config-$ENV/*  $SCRIPT_DIR/../__config__/
+
+  if [[ $ENV = "dev" ]]
+  then
+    DEBUG_KEYSTORE_FILE="$CONFIG_DIR/debug.keystore"
+    DEBUG_KEYSTORE_TARGET="$ANDROID_DIR/app/debug.keystore"
+    echo "copy $DEBUG_KEYSTORE_FILE to $DEBUG_KEYSTORE_TARGET"
+    yes | cp -rf $DEBUG_KEYSTORE_FILE $DEBUG_KEYSTORE_TARGET
+  fi
+
+  # GOOGLE_SERVICE_JSON_FILE="$CONFIG_DIR/google-services.json"
+  # GOOGLE_SERVICE_JSON_TARGET="$ANDROID_DIR/app/google-services.json"
+  # echo "copy $GOOGLE_SERVICE_JSON_FILE to $GOOGLE_SERVICE_JSON_TARGET"
+  # yes | cp -rf $GOOGLE_SERVICE_JSON_FILE $GOOGLE_SERVICE_JSON_TARGET
+
+  # GOOGLE_SERVICE_INFO_PLIST_FILE="$CONFIG_DIR/GoogleService-Info.plist"
+  # GOOGLE_SERVICE_INFO_PLIST_TARGET="$IOS_DIR/GoogleService-Info.plist"
+  # echo "copy $GOOGLE_SERVICE_INFO_PLIST_FILE to $GOOGLE_SERVICE_INFO_PLIST_TARGET"
+  # cp $GOOGLE_SERVICE_INFO_PLIST_FILE $GOOGLE_SERVICE_INFO_PLIST_TARGET
+
+  # ANDROID_RELEASE_KEYSTORE_FILE="$CONFIG_DIR/tomsir-key.keystore"
+  # ANDROID_RELEASE_KEYSTORE_FILE_TARGET="$ANDROID_DIR/app"
+  # echo "copy release keystore in $ANDROID_RELEASE_KEYSTORE_FILE to $ANDROID_RELEASE_KEYSTORE_FILE_TARGET"
+  # cp $ANDROID_RELEASE_KEYSTORE_FILE $ANDROID_RELEASE_KEYSTORE_FILE_TARGET
+}
+
+function initiate {
+  ANDROID_APP_ID="$( jq -r .androidAppId $CONFIG_DIR/config.json )"
+  IOS_BUNDLE_ID="$( jq -r .iosBundleId $CONFIG_DIR/config.json )"
+  APP_NAME="$( jq -r .appName $CONFIG_DIR/config.json )"
+  DISPLAY_NAME="$( jq -r .displayName $CONFIG_DIR/config.json)"
+  IOS_GOOGLE_CLIENT_ID_SCHEME="$( jq -r .googleSignInConfig.iosClientIdReverse $CONFIG_DIR/config.json)"
+
+  ## Change android
+  ##
+  BUCK_PATH="$ANDROID_DIR/app/_BUCK"
+  echo "change package in $BUCK_PATH to $ANDROID_APP_ID"
+  sed -i '' "s/package = \".*\",/package = \"$ANDROID_APP_ID\"/g" $BUCK_PATH
+
+  BUILD_GRADLE_APP_PATH="$ANDROID_DIR/app/build.gradle"
+  echo "change applicationId in $BUILD_GRADLE_APP_PATH to $ANDROID_APP_ID"
+  sed -i '' "s/applicationId \".*\"/applicationId \"$ANDROID_APP_ID\"/g" $BUILD_GRADLE_APP_PATH
+
+  ANDROID_MANIFEST_PATH="$ANDROID_DIR/app/src/main/AndroidManifest.xml"
+  echo "change package in $ANDROID_MANIFEST_PATH to $ANDROID_APP_ID"
+  sed -i '' "s/package=\".*\"/package=\"$ANDROID_APP_ID\"/g" $ANDROID_MANIFEST_PATH
+
+  MAIN_ACTIVITY_JAVA_PATH="$ANDROID_DIR/app/src/main/java/com/tomsir/MainActivity.java"
+  echo "change package in $MAIN_ACTIVITY_JAVA_PATH to $ANDROID_APP_ID"
+  sed -i '' "s/^package .*;$/package $ANDROID_APP_ID;/g" $MAIN_ACTIVITY_JAVA_PATH
+  echo "change componentName in $MAIN_ACTIVITY_JAVA_PATH to $APP_NAME"
+  sed -i '' "s/return \"TomSir\";/return \"$APP_NAME\";/g" $MAIN_ACTIVITY_JAVA_PATH
+
+  MAIN_APPLICATION_JAVA_PATH="$ANDROID_DIR/app/src/main/java/com/tomsir/MainApplication.java"
+  echo "change package in $MAIN_APPLICATION_JAVA_PATH to $ANDROID_APP_ID"
+  sed -i '' "s/^package .*;$/package $ANDROID_APP_ID;/g" $MAIN_APPLICATION_JAVA_PATH
+
+  APP_JSON_PATH="$ROOT_DIR/app.json"
+  echo "change name in $APP_JSON_PATH to $APP_NAME"
+  sed -i '' "s/\"name\": \".*\"/\"name\": \"${APP_NAME}\"/g" $APP_JSON_PATH
+  echo "change displayName in $APP_JSON_PATH to $DISPLAY_NAME"
+  sed -i '' "s/\"displayName\": \".*\"/\"displayName\": \"${DISPLAY_NAME}\"/g" $APP_JSON_PATH
+
+  PACKAGE_JSON_PATH="$ROOT_DIR/package.json"
+  echo "change name in $PACKAGE_JSON_PATH to $APP_NAME"
+  sed -i '' "s/\"name\": \".*\"/\"name\": \"${APP_NAME}\"/g" $PACKAGE_JSON_PATH
+
+  SETTING_GRADLE_PATH="$ANDROID_DIR/settings.gradle"
+  echo "change name in $SETTING_GRADLE_PATH to $APP_NAME"
+  sed -i '' "s/rootProject.name = '.*'/rootProject.name = '$APP_NAME'/g" $SETTING_GRADLE_PATH
+
+  STRINGS_XML_PATH="$ANDROID_DIR/app/src/main/res/values/strings.xml"
+  echo "change app_name in $STRINGS_XML_PATH to $DISPLAY_NAME"
+  sed -i '' "s/\"app_name\">.*</\"app_name\">$DISPLAY_NAME</g" $STRINGS_XML_PATH
+
+  ## Change iOS
+  ##
+  APP_DELEGATE_PATH="$IOS_DIR/TomSir/AppDelegate.m"
+  echo "change moduleName in $APP_DELEGATE_PATH to $APP_NAME"
+  sed -i '' "s/moduleName:@\".*\"/moduleName:@\"$APP_NAME\"/g" $APP_DELEGATE_PATH
+
+  INFO_PLIST_FILE="$IOS_DIR/TomSir/Info.plist"
+  echo "change CFBundleURLTypes for BundleID in $INFO_PLIST_FILE to $IOS_BUNDLE_ID"
+  /usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:0:CFBundleURLSchemes:0 $IOS_BUNDLE_ID" $INFO_PLIST_FILE
+  #plutil -remove CFBundleURLTypes.0.CFBundleURLSchemes.0 $INFO_PLIST_FILE
+  #plutil -replace CFBundleURLTypes.0.CFBundleURLSchemes.0 -string $IOS_BUNDLE_ID $INFO_PLIST_FILE
+
+  echo "change CFBundleURLTypes for GoogleClientID in $INFO_PLIST_FILE to $IOS_GOOGLE_CLIENT_ID_SCHEME"
+  /usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:1:CFBundleURLSchemes:0 $IOS_GOOGLE_CLIENT_ID_SCHEME" $INFO_PLIST_FILE
+  #plutil -remove CFBundleURLTypes.1.CFBundleURLSchemes.0 $INFO_PLIST_FILE
+  #plutil -replace CFBundleURLTypes.1.CFBundleURLSchemes.0 -string $IOS_GOOGLE_CLIENT_ID_SCHEME $INFO_PLIST_FILE
+}
+
+function main {
+  ENV=$1
+  INITIATE=$2
+  echo "env $ENV"
+  echo "opt $INITIATE"
+
+  if [[ $ENV = "dev" ]] || [[ $ENV = "staging" ]] || [[ $ENV = "prod" ]] && [[ $INITIATE = "--initiate-only" ]]
+  then
+    initiate $ENV
+  elif  [[ $ENV = "dev" ]] || [[ $ENV = "staging" ]] || [[ $ENV = "prod" ]]
+  then
+    copy_and_replace $ENV
+    # initiate $ENV
+  else
+    echo "2nd argument not accepted, only accept 'dev', 'staging' or 'prod'"
+  fi
+}
+
+main $1 $2 | with_timestamps
+
+## run script
+## export [dev|staging|prod]
+## export [dev|staging|[rpd] --initiate-only

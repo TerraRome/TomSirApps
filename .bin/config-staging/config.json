@@ -1,0 +1,7 @@
+{
+  "appName": "TomSir",
+  "displayName": "TomSir (Staging)",
+  "androidAppId": "id.tomsir.app.android.staging",
+  "iosBundleId": "id.tomsir.app.ios.staging",
+  "baseURL": "https://tomsir.fopini.id"
+}

@@ -1,0 +1,7 @@
+{
+  "appName": "TomSir",
+  "displayName": "TomSir (Dev)",
+  "androidAppId": "id.tomsir.app.android.dev",
+  "iosBundleId": "id.tomsir.app.ios.dev",
+  "baseURL": "https://api-dev.tomsirpos.com"
+}

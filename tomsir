@@ -1,0 +1,67 @@
+#!/bin/bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+function export {
+  ENV=$2
+  OPTION_ARG=$3
+  echo "env $ENV"
+  echo "opt $OPTION_ARG"
+
+  if [[ $ENV = "dev" ]] || [[ $ENV = "staging" ]] || [[ $ENV = "prod" ]]
+  then
+    cd $SCRIPT_DIR
+    sh ./.bin/export $ENV $OPTION_ARG
+  else
+    echo "2nd argument not accepted, only accept 'dev', 'staging' or 'prod'"
+  fi
+}
+
+function push {
+  PLATFORM=$2
+  ENV=$3
+
+  if [[ $PLATFORM = "android" ]] || [[ $PLATFORM = "ios" ]]
+  then
+    if [[ $ENV = 'dev' ]] || [[ $ENV = 'staging' ]] || [[ $ENV = 'prod' ]]
+    then
+      cd $SCRIPT_DIR
+      sh ./.bin/distribution/firebase-upload $PLATFORM $ENV
+    else
+      echo "only accept [dev|staging|prod]"
+    fi
+  else
+    echo "only accept [android|ios]"
+  fi
+}
+
+function commit {
+  APP_VERSION="$( jq -r .version $SCRIPT_DIR/package.json )"
+  MESSAGE="[skip ci] bump version $APP_VERSION"
+  REPO_ADDRESS="https://$GIT_USERNAME:$GIT_PASSWORD@gitlab.com/feriferdinan/tomsir.git"
+
+  cd $SCRIPT_DIR
+  pwd
+  git add .
+  git commit -m "$MESSAGE"
+  echo $REPO_ADDRESS
+  git push $REPO_ADDRESS $CURRENT_BRANCH
+  echo "commit message: $MESSAGE"
+  git status
+}
+
+function main {
+  cd $SCRIPT_DIR
+  if [[ $1 = "export" ]]
+  then
+    export $1 $2 $3
+  else
+    echo "unknown arg $1, accept [export|run|bump|build|push|commit]"
+  fi
+}
+
+ main $1 $2 $3
+
+
+# ./tomsir export [dev|staging|prod]
+# ./tomsir export [dev|staging|prod] --initiate-only
