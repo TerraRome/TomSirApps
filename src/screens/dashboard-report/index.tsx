@@ -1,25 +1,24 @@
-import React, {useState, useCallback, useEffect} from 'react'
-import {View, TouchableOpacity, FlatList, ActivityIndicator, Image, RefreshControl, Share} from 'react-native'
-import Text from '@components/Text'
-import {StyleSheet} from 'react-native'
-import Feather from 'react-native-vector-icons/Feather'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import {useNavigation} from '@react-navigation/core'
-import {theme} from 'utils/theme'
-import {SafeAreaView} from 'react-native-safe-area-context'
-import {useDispatch, useSelector} from 'react-redux'
-import {convertToRupiah} from 'utils/convertRupiah'
-import {setReportHistory, setReportSummary} from 'store/actions/report'
-import {showErrorToast} from '@components/Toast'
-import TextInput from '@components/TextInput'
-import {getReportExcel, getReportList, getReportSummary} from 'services/report'
-import {useIsFocused} from '@react-navigation/native'
 import CalendarPicker from '@components/CalendarPicker'
-import moment from 'moment'
-import {downloadFile} from 'utils/fetch-blob'
 import Loader from '@components/Loader'
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
+import Text from '@components/Text'
+import TextInput from '@components/TextInput'
+import { showErrorToast } from '@components/Toast'
+import { useNavigation } from '@react-navigation/core'
+import { useIsFocused } from '@react-navigation/native'
+import moment from 'moment'
+import React, { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, FlatList, Image, PermissionsAndroid, RefreshControl, Share, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import Feather from 'react-native-vector-icons/Feather'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { useDispatch, useSelector } from 'react-redux'
+import { getReportExcel, getReportList, getReportSummary } from 'services/report'
+import { setReportHistory, setReportSummary } from 'store/actions/report'
+import { convertToRupiah } from 'utils/convertRupiah'
+import { downloadFile } from 'utils/fetch-blob'
+import { theme } from 'utils/theme'
 
 let searchDebounce: any = null
 export default function DashboardReport() {
@@ -28,7 +27,7 @@ export default function DashboardReport() {
   const isFocused = useIsFocused()
   const report = useSelector((state: any) => state.report)
   const merchant = useSelector((state: any) => state.auth?.merchant)
-  const {rows, page_size, current_page} = report.history
+  const { rows, page_size, current_page } = report.history
 
   const [isLoading, setLoading] = useState(false)
   const [isLoading2, setLoading2] = useState(false)
@@ -50,17 +49,17 @@ export default function DashboardReport() {
       setLoading(true)
       try {
         const {
-          data: {data: dataHistory},
-        } = await getReportList({...queryParams, ...params})
+          data: { data: dataHistory },
+        } = await getReportList({ ...queryParams, ...params })
         const {
-          data: {data: dataSummary},
+          data: { data: dataSummary },
         } = await getReportSummary({
           start_date: queryParams.start_date,
           end_date: queryParams.end_date,
         })
         dispatch(setReportHistory(dataHistory))
         dispatch(setReportSummary(dataSummary))
-      } catch (error) {
+      } catch (error: any) {
         showErrorToast(error.message)
       } finally {
         setLoading(false)
@@ -75,27 +74,45 @@ export default function DashboardReport() {
     if (isLoading || !hasNextPage) {
       return
     }
-    getData({page: nextPage})
+    getData({ page: nextPage })
   }
 
   const refreshData = (param?: any) => {
-    getData({page: 1, ...param})
+    getData({ page: 1, ...param })
   }
 
   const onShare = async () => {
     setLoading2(true)
     try {
       const {
-        data: {data: url},
+        data: { data: url },
       } = await getReportExcel({
         start_date: queryParams.start_date,
         end_date: queryParams.end_date,
       })
+      console.log(url);
+
       const message = `Laporan penjualan ${merchant?.name} dari ${queryParams.start_date} sampai ${queryParams.end_date} `
       const filename = message + url
-      await downloadFile(url, message)
-      Share.share({url, message: filename, title: filename})
-    } catch (error) {
+
+      const permission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Permission Needed',
+          message: 'For download purpose',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK'
+        }
+      );
+
+      if (permission === 'denied') return;
+      if (permission === 'granted') {
+        // YOUR WRITE FUNCTION HERE
+        await downloadFile(url, message)
+        Share.share({ url, message: filename, title: filename })
+      }
+    } catch (error: any) {
       showErrorToast(error.message)
     } finally {
       setLoading2(false)
@@ -105,9 +122,9 @@ export default function DashboardReport() {
   const handleSearch = (search: any) => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => {
-      refreshData({search})
+      refreshData({ search })
     }, 400)
-    setParams({...queryParams, search})
+    setParams({ ...queryParams, search })
   }
 
   useEffect(() => {
@@ -115,14 +132,14 @@ export default function DashboardReport() {
   }, [isFocused, queryParams.start_date])
 
   const Summary = () => (
-    <View style={{paddingHorizontal: 16}}>
-      <View style={{marginBottom: 16}}>
+    <View style={{ paddingHorizontal: 16 }}>
+      <View style={{ marginBottom: 16 }}>
         <Text size={10} type="semibold">
           Ringkasan
         </Text>
       </View>
       <View style={styles.wrapSummaryCard}>
-        <View style={[styles.summaryCard, styles.shadow, {backgroundColor: '#1FB0B0'}]}>
+        <View style={[styles.summaryCard, styles.shadow, { backgroundColor: '#1FB0B0' }]}>
           <Text color={theme.colors.white} type="bold" size={10}>
             {convertToRupiah(report?.summary?.gross_income || '0')}
           </Text>
@@ -130,7 +147,7 @@ export default function DashboardReport() {
             Pendapatan Kotor
           </Text>
         </View>
-        <View style={[styles.summaryCard, styles.shadow, {backgroundColor: '#FF7544'}]}>
+        <View style={[styles.summaryCard, styles.shadow, { backgroundColor: '#FF7544' }]}>
           <Text color={theme.colors.white} type="bold" size={10}>
             {convertToRupiah(report?.summary?.net_income || '0')}
           </Text>
@@ -140,7 +157,7 @@ export default function DashboardReport() {
         </View>
       </View>
       <View style={styles.wrapSummaryCard}>
-        <View style={[styles.summaryCard, styles.shadow, {backgroundColor: '#FC5B7D'}]}>
+        <View style={[styles.summaryCard, styles.shadow, { backgroundColor: '#FC5B7D' }]}>
           <Text color={theme.colors.white} type="bold" size={10}>
             {convertToRupiah(report?.summary?.total_order || '0')}
           </Text>
@@ -158,9 +175,9 @@ export default function DashboardReport() {
             })
           }
           activeOpacity={0.8}
-          style={[styles.summaryCard, styles.shadow, {backgroundColor: '#8577FE'}]}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <View style={{flex: 0.9}}>
+          style={[styles.summaryCard, styles.shadow, { backgroundColor: '#8577FE' }]}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={{ flex: 0.9 }}>
               <Text color={theme.colors.white} type="bold" size={10}>
                 {convertToRupiah(report?.summary?.total_qty || '0')}
               </Text>
@@ -168,13 +185,13 @@ export default function DashboardReport() {
                 Total Item Terjual
               </Text>
             </View>
-            <View style={{alignSelf: 'flex-end'}}>
+            <View style={{ alignSelf: 'flex-end' }}>
               <Feather name="chevron-right" size={18} color={theme.colors.white} />
             </View>
           </View>
         </TouchableOpacity>
       </View>
-      <View style={{marginVertical: 16}}>
+      <View style={{ marginVertical: 16 }}>
         <Text size={10} type="semibold">
           Riwayat
         </Text>
@@ -182,11 +199,11 @@ export default function DashboardReport() {
     </View>
   )
 
-  const HistoryCard = ({item}: any) => (
+  const HistoryCard = ({ item }: any) => (
     <TouchableOpacity
       key={item.id}
       activeOpacity={0.6}
-      onPress={() => navigation.navigate('DetailHistory', {item})}
+      onPress={() => navigation.navigate('DetailHistory', { item })}
       style={[styles.historyCard]}>
       <View style={styles.wrapInfo}>
         <Text style={styles.textInfo} type="semibold" size={8} color={theme.colors.textSemiBold}>
@@ -229,11 +246,11 @@ export default function DashboardReport() {
           <Feather name="download" size={18} />
         </TouchableOpacity>
       </View>
-      <View style={[styles.content, {marginBottom: 16}]}>
+      <View style={[styles.content, { marginBottom: 16 }]}>
         {isSearching || queryParams.search ? (
           <View style={styles.rowCenter}>
             <TextInput
-              style={{flex: 1, marginVertical: 0}}
+              style={{ flex: 1, marginVertical: 0 }}
               value={queryParams.search}
               placeholder="Cari id pesanan..."
               onChangeText={handleSearch}
@@ -249,12 +266,12 @@ export default function DashboardReport() {
           </View>
         ) : (
           <View style={styles.rowCenter}>
-            <View style={{flex: 0.9}}>
+            <View style={{ flex: 0.9 }}>
               <CalendarPicker
                 selectedStartDate={queryParams.start_date}
                 selectedEndDate={queryParams.end_date}
                 onChange={props => {
-                  const params = {...queryParams, start_date: props.selectedStartDate, end_date: props.selectedEndDate}
+                  const params = { ...queryParams, start_date: props.selectedStartDate, end_date: props.selectedEndDate }
                   setParams(params)
                 }}
               />
@@ -267,7 +284,7 @@ export default function DashboardReport() {
       </View>
       <FlatList
         data={rows}
-        contentContainerStyle={{paddingBottom: 150}}
+        contentContainerStyle={{ paddingBottom: 150 }}
         ListHeaderComponent={Summary}
         renderItem={HistoryCard}
         keyExtractor={item => item.id}
@@ -296,7 +313,7 @@ const EmptyList = () => (
   </View>
 )
 
-const Footer = ({loading}: {loading: boolean}) => (
+const Footer = ({ loading }: { loading: boolean }) => (
   <View style={styles.footer}>
     <ActivityIndicator size="large" color={theme.colors.primary} animating={loading} />
   </View>
@@ -357,14 +374,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 7,
   },
-  center: {alignSelf: 'center'},
+  center: { alignSelf: 'center' },
   footer: {
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
-  emptyImage: {width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain'},
+  emptyImage: { width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain' },
   shadow: {
     shadowColor: '#000',
     shadowOffset: {
@@ -390,6 +407,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.defaultBorderColor,
   },
-  rowCenter: {flexDirection: 'row', alignItems: 'center'},
-  downloadButton: {marginRight: 20, flexDirection: 'row', alignItems: 'center'},
+  rowCenter: { flexDirection: 'row', alignItems: 'center' },
+  downloadButton: { marginRight: 20, flexDirection: 'row', alignItems: 'center' },
 })

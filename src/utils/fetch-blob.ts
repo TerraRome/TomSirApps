@@ -19,16 +19,22 @@ export const fetchBase64 = (uri: string) => {
   })
 }
 
-const getFileExtention = (fileUrl: string) => (/[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined)
+const getFileExtention = (fileUrl: string) =>
+  /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined
 
 export const downloadFile = (uri: string, filename: string) =>
   new Promise((resolve, reject) => {
     let date = new Date()
     let FILE_URL = uri
+    // console.log(FILE_URL)
+
     let file_ext = getFileExtention(FILE_URL)
+    // @ts-ignore
     file_ext = '.' + file_ext[0]
     let RootDir = fs.dirs.DownloadDir
-    let name = filename ? filename : Math.floor(date.getTime() + date.getSeconds() / 2)
+    let name = filename
+      ? filename
+      : Math.floor(date.getTime() + date.getSeconds() / 2)
     let options = {
       fileCache: true,
       addAndroidDownloads: {
@@ -38,5 +44,8 @@ export const downloadFile = (uri: string, filename: string) =>
         useDownloadManager: true,
       },
     }
-    RNFetchBlob.config(options).fetch('GET', FILE_URL).then(resolve).catch(reject)
+    RNFetchBlob.config(options)
+      .fetch('GET', FILE_URL)
+      .then(resolve)
+      .catch(reject)
   })

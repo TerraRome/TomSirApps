@@ -1,16 +1,16 @@
-import React, {useState} from 'react'
-import {SafeAreaView, View, StyleSheet, ScrollView, Image, TouchableOpacity} from 'react-native'
+import Button from '@components/Button'
 import Text from '@components/Text'
 import TextInput from '@components/TextInput'
-import Button from '@components/Button'
-import {theme} from '@utils/theme'
-import {getMerchantById} from '@store/actions/merchant'
-import {useSelector, useDispatch} from 'react-redux'
-import {addMerchant, editMerchants} from '@services/merchant'
-import {showErrorToast, showSuccessToast} from 'components/Toast'
+import { addMerchant, editMerchants } from '@services/merchant'
+import { getMerchantById } from '@store/actions/merchant'
+import { theme } from '@utils/theme'
+import { showErrorToast, showSuccessToast } from 'components/Toast'
+import React, { useState } from 'react'
+import { Image, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { launchImageLibrary } from 'react-native-image-picker'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import {launchImageLibrary} from 'react-native-image-picker'
+import { useDispatch, useSelector } from 'react-redux'
 
 const options: any = {
   quality: 1,
@@ -19,11 +19,11 @@ const options: any = {
   maxHeight: 200,
 }
 
-const ManageMerchant = ({navigation, route}: any) => {
+const ManageMerchant = ({ navigation, route }: any) => {
   const dispatch = useDispatch()
   const id = route?.params?.id || ''
   const isEdit = route?.params?.isEdit
-  const {user} = useSelector((state: any) => state.auth)
+  const { user } = useSelector((state: any) => state.auth)
   const isAdmin = user?.role === 'admin'
 
   const [merchant, setMerchant] = useState<any>({
@@ -60,7 +60,7 @@ const ManageMerchant = ({navigation, route}: any) => {
   }
 
   const onCreateMerchant = async () => {
-    const {name, address, phone, footer_note, image} = merchant
+    const { name, address, phone, footer_note, image } = merchant
 
     const formData: any = new FormData()
     formData.append('name', name)
@@ -88,7 +88,7 @@ const ManageMerchant = ({navigation, route}: any) => {
             navigation.navigate('ManageMerchantList')
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         showErrorToast(error.message)
       }
     } else {
@@ -98,7 +98,7 @@ const ManageMerchant = ({navigation, route}: any) => {
           showSuccessToast('Berhasil mendaftarkan merchant')
           navigation.navigate('ManageMerchantList')
         }
-      } catch (error) {
+      } catch (error: any) {
         showErrorToast(error.message)
       }
     }
@@ -129,14 +129,14 @@ const ManageMerchant = ({navigation, route}: any) => {
             type="default"
             multiline
             placeholder="Mis. Password Wifi"
-            style={{height: 70}}
+            style={{ height: 70 }}
             value={merchant.footer_note}
             onChangeText={onChange('footer_note')}
           />
           <Text style={styles.inputTitle}>Logo Merchant</Text>
           <View style={styles.photoWrapper}>
             {merchant.imageUri ? (
-              <Image source={{uri: merchant.imageUri}} style={styles.photo} />
+              <Image source={{ uri: merchant.imageUri }} style={styles.photo} />
             ) : (
               <View style={styles.photo}>
                 <Ionicons name="ios-image-outline" size={25} color={theme.colors.grey} />

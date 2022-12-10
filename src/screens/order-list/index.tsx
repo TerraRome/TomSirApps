@@ -39,7 +39,7 @@ const OrderList = ({ navigation }: any) => {
 
   const getData = useCallback(
     async (params?: any) => {
-      console.log(merchant.id);
+      // console.log(merchant.id);
 
       setLoading(true)
       try {

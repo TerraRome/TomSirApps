@@ -12,6 +12,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { persistor, store } from '@store/store'
 
 LogBox.ignoreAllLogs();
+LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
 
 function App() {
   return (

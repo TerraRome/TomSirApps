@@ -67,7 +67,7 @@ function initiate {
   echo "change package in $MAIN_ACTIVITY_JAVA_PATH to $ANDROID_APP_ID"
   sed -i '' "s/^package .*;$/package $ANDROID_APP_ID;/g" $MAIN_ACTIVITY_JAVA_PATH
   echo "change componentName in $MAIN_ACTIVITY_JAVA_PATH to $APP_NAME"
-  sed -i '' "s/return \"TomSir\";/return \"$APP_NAME\";/g" $MAIN_ACTIVITY_JAVA_PATH
+  sed -i '' "s/return \"POS-RaidiSolution\";/return \"$APP_NAME\";/g" $MAIN_ACTIVITY_JAVA_PATH
 
   MAIN_APPLICATION_JAVA_PATH="$ANDROID_DIR/app/src/main/java/com/tomsir/MainApplication.java"
   echo "change package in $MAIN_APPLICATION_JAVA_PATH to $ANDROID_APP_ID"
@@ -93,11 +93,11 @@ function initiate {
 
   ## Change iOS
   ##
-  APP_DELEGATE_PATH="$IOS_DIR/TomSir/AppDelegate.m"
+  APP_DELEGATE_PATH="$IOS_DIR/POS-RaidiSolution/AppDelegate.m"
   echo "change moduleName in $APP_DELEGATE_PATH to $APP_NAME"
   sed -i '' "s/moduleName:@\".*\"/moduleName:@\"$APP_NAME\"/g" $APP_DELEGATE_PATH
 
-  INFO_PLIST_FILE="$IOS_DIR/TomSir/Info.plist"
+  INFO_PLIST_FILE="$IOS_DIR/POS-RaidiSolution/Info.plist"
   echo "change CFBundleURLTypes for BundleID in $INFO_PLIST_FILE to $IOS_BUNDLE_ID"
   /usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:0:CFBundleURLSchemes:0 $IOS_BUNDLE_ID" $INFO_PLIST_FILE
   #plutil -remove CFBundleURLTypes.0.CFBundleURLSchemes.0 $INFO_PLIST_FILE

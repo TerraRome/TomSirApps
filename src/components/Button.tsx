@@ -1,7 +1,7 @@
-import React, {ReactNode} from 'react'
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
-import {TouchableOpacity, StyleSheet, StyleProp, ViewStyle} from 'react-native'
-import {theme} from '@utils/theme'
+import { theme } from '@utils/theme'
+import React, { ReactNode } from 'react'
+import { StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 
 interface Props {
   mode?: 'outlined' | 'default' | 'link'

@@ -22,6 +22,7 @@ export interface OrderPay {
 export interface Order extends OrderPay {
   type_order: string
   note_order: string
+  whatsapp: string
   products: Product[]
   status: 'hold' | 'paid'
 }

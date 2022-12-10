@@ -1,15 +1,13 @@
-import React, {useCallback, useEffect, useState} from 'react'
-import {View, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, RefreshControl, TextInput} from 'react-native'
-import {useNavigation} from '@react-navigation/native'
-import {useIsFocused} from '@react-navigation/native'
-import {useSelector, useDispatch} from 'react-redux'
-import {theme} from '@utils/theme'
-import Text from '@components/Text'
-import {getMerchantById} from '@store/actions/merchant'
 import CustomButton from '@components/Button'
+import Text from '@components/Text'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
+import { getMerchants } from '@services/merchant'
+import { setMerchant } from '@store/actions/merchant'
+import { theme } from '@utils/theme'
+import React, { useCallback, useEffect, useState } from 'react'
+import { FlatList, RefreshControl, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import {setMerchant} from '@store/actions/merchant'
-import {getMerchants} from '@services/merchant'
+import { useDispatch, useSelector } from 'react-redux'
 
 interface Merchant {
   id: string
@@ -23,7 +21,7 @@ const ManageMerchantList: React.FC = () => {
   const isFocused = useIsFocused()
   const dispatch = useDispatch()
   const [isLoading, setLoading] = useState(false)
-  const {rows, page_size, current_page} = useSelector((state: any) => state.merchants)
+  const { rows, page_size, current_page } = useSelector((state: any) => state.merchants)
 
   const [queryParams, setParams] = useState({
     page: 1,
@@ -38,7 +36,7 @@ const ManageMerchantList: React.FC = () => {
   }, [queryParams, isFocused])
 
   const refreshData = (params?: any) => {
-    getData({page: 1, ...params})
+    getData({ page: 1, ...params })
   }
 
   const getData = useCallback(
@@ -49,11 +47,11 @@ const ManageMerchantList: React.FC = () => {
           delete queryParams.search
         }
         const {
-          data: {data},
-        } = await getMerchants({...queryParams, ...params})
+          data: { data },
+        } = await getMerchants({ ...queryParams, ...params })
         dispatch(setMerchant(data))
       } catch (error) {
-        console.log(error.response)
+        // console.log(error.response)
       } finally {
         setLoading(false)
       }
@@ -64,9 +62,9 @@ const ManageMerchantList: React.FC = () => {
   const handleSearch = (search: any) => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => {
-      refreshData({search})
+      refreshData({ search })
     }, 400)
-    setParams({...queryParams, search})
+    setParams({ ...queryParams, search })
   }
 
   const onPressMerchant = (item: any) => () => {
@@ -81,7 +79,7 @@ const ManageMerchantList: React.FC = () => {
     })
   }
 
-  const renderItem = ({item}: {item: Merchant}) => {
+  const renderItem = ({ item }: { item: Merchant }) => {
     return (
       <TouchableOpacity style={styles.productList} onPress={onPressMerchant(item)}>
         <Text size={9} type="regular">

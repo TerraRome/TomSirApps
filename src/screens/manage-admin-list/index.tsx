@@ -46,7 +46,7 @@ const ManageAdminList = ({ navigation }: any) => {
         } = await getUsers({ ...queryParams, ...params })
         dispatch(setUsers(data))
       } catch (error: any) {
-        console.log(error.response)
+        // console.log(error.response)
       } finally {
         setIsLoading(false)
       }

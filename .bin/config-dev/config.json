@@ -1,6 +1,6 @@
 {
-  "appName": "TomSir",
-  "displayName": "TomSir (Dev)",
+  "appName": "POS-RaidiSolution",
+  "displayName": "POS-RaidiSolution (Dev)",
   "androidAppId": "id.tomsir.app.android.dev",
   "iosBundleId": "id.tomsir.app.ios.dev",
   "baseURL": "https://api-dev.tomsirpos.com"

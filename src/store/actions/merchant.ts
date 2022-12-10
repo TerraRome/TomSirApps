@@ -33,6 +33,6 @@ export const getMerchantById = () => async (dispatch: any) => {
     } = await getMerchantId(merchant_id)
     dispatch(setMerchantById(data))
   } catch (error: any) {
-    console.log(error)
+    // console.log(error)
   }
 }

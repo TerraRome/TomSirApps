@@ -15,12 +15,10 @@ import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native'
 import { getReportById } from '@services/report'
 import calculateCart from '@utils/calculateCart'
 import { convertToRupiah } from '@utils/convertRupiah'
-
 import { printBill } from '@utils/print-bill'
-
-//@ts-ignore
 import moment from 'moment'
 import { useLayoutEffect } from 'react'
+//@ts-ignore
 import { BluetoothManager } from 'react-native-bluetooth-escpos-printer'
 import { Modalize } from 'react-native-modalize'
 import { setPrinter } from 'store/actions/apps'
@@ -31,7 +29,8 @@ export default function DetailHistory() {
   const route: any = useRoute()
   const dispatch = useDispatch()
   const isFocused = useIsFocused()
-  const modalSelectPrinter = useRef<Modalize>(null)
+  const modalSelectPrinter: any = useRef()
+  const modalFilterRef: any = useRef()
   const [item, setItem] = useState(route?.params?.item)
   const [isLoading, setLoading] = useState(false)
   const [listPrinter, setListPrinter] = useState([])
@@ -81,6 +80,7 @@ export default function DetailHistory() {
       const listString = await BluetoothManager.enableBluetooth()
       const data = listString.map((e: any) => JSON.parse(e))
       setListPrinter(data)
+
       if (!prnter) {
         modalSelectPrinter?.current?.open()
         return
@@ -89,11 +89,10 @@ export default function DetailHistory() {
       await BluetoothManager.connect(prnter.address)
       item.logo = merchant?.image ? await fetchBase64(merchant.image) : undefined
       await printBill({ ...item, merchant })
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error?.message || 'Failed, please connect or turn on printer')
       dispatch(setPrinter(null))
     } finally {
-      modalSelectPrinter?.current?.close()
       setLoading(false)
     }
   }

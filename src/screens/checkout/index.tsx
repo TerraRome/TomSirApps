@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   Alert, FlatList, Image, Modal, ScrollView, StyleSheet, TextInput as PureTextInput, TouchableOpacity, View
 } from 'react-native'
 
 import { theme } from '@utils/theme'
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -16,7 +17,6 @@ import WrapFooterButton from '@components/WrapFooterButton'
 //@ts-ignore
 import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native'
 import { showErrorToast } from 'components/Toast'
-import { addCustomer } from 'services/customer'
 import { deleteOrder, getOrderById, Order, order, updateOrder } from 'services/order'
 import { setCarts } from 'store/actions/carts'
 import calculateCart from 'utils/calculateCart'
@@ -25,11 +25,12 @@ import { convertToRupiah } from 'utils/convertRupiah'
 import { printBill } from '@utils/print-bill'
 import { printCheff } from '@utils/print-cheff'
 
-//@ts-ignore
 import Modalize from '@components/Modalize'
+//@ts-ignore
 import { BluetoothManager } from 'react-native-bluetooth-escpos-printer'
 import { setPrinter } from 'store/actions/apps'
 import { fetchBase64 } from 'utils/fetch-blob'
+import { whatsappBill } from 'utils/whatsapp-bill'
 
 const PAYMENT_TYPE = [
   { label: 'Debit', icon: 'money-check', id: 1 },
@@ -54,10 +55,8 @@ export default function CheckOut() {
   const [typeOrder, setTypeOrder] = useState(item?.type || 'dine_in')
   const [tax, setTax] = useState(item?.tax_percentage || '')
   const [noteDineIn, setNoteDineIn] = useState(item?.note || '')
-  const [email, setEmail] = useState('')
-  const [phone_number, setPhone_number] = useState('')
+  const [phone_number, setPhone_number] = useState(item?.whatsapp || '')
   const [showModalSave, setModalSave] = useState(false)
-  const [showModalPelanggan, setModalPelanggan] = useState(false)
   const [listPrinter, setListPrinter] = useState([])
   const [typePrint, setTypePrint] = useState<'bill' | 'cheff'>('bill')
   const printer = useSelector((state: any) => state.apps.printer)
@@ -102,6 +101,7 @@ export default function CheckOut() {
       id: orderId,
       type_order: typeOrder,
       note_order: noteDineIn,
+      whatsapp: phone_number,
       products: carts.map((e: any) => ({
         id: e.id,
         qty: e.qty,
@@ -129,23 +129,6 @@ export default function CheckOut() {
       setModalSave(false)
       //@ts-ignore
       navigation.replace('OrderList')
-    } catch (error: any) {
-      showErrorToast(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleHoldCustomer = async () => {
-    const formData: any = new FormData()
-    formData.append('name', noteDineIn)
-    formData.append('email', email)
-    formData.append('phone_number', phone_number)
-
-    setLoading(true)
-    try {
-      await addCustomer(formData)
-      setModalPelanggan(false)
     } catch (error: any) {
       showErrorToast(error.message)
     } finally {
@@ -206,7 +189,6 @@ export default function CheckOut() {
       dispatch(setPrinter(null))
       showErrorToast(error?.message || 'Failed, please connect or turn on printer')
     } finally {
-      modalSelectPrinter?.current?.close()
       setLoading(false)
     }
   }
@@ -264,17 +246,7 @@ export default function CheckOut() {
       }
       return handleHoldOrder()
     }
-    setModalSave(true)
-  }
-
-  const handleCustomerChange = () => {
-    if (isPendingOrder) {
-      if (isPendingOrderChange) {
-        return handleUpdateOrder()
-      }
-      return handleHoldOrder()
-    }
-    setModalPelanggan(true)
+    handleHoldOrder()
   }
 
   useEffect(() => {
@@ -283,26 +255,34 @@ export default function CheckOut() {
     }
   }, [isFocused])
 
-  // { View Cetak Dihapus }
-  // useLayoutEffect(() => {
-  //   if (isPendingOrder) {
-  //     navigation.setOptions({
-  //       headerTitle: isPendingOrder ? noteDineIn : 'Detail Pesanan',
-  //       headerRight: () => (
-  //         <TouchableOpacity
-  //           onPress={() => {
-  //             modalSelectTypePrint?.current?.open()
-  //           }}
-  //           style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
-  //           <AntDesign name="printer" size={18} />
-  //           <Text type="semibold" size={8} style={{ marginLeft: 4 }}>
-  //             Cetak
-  //           </Text>
-  //         </TouchableOpacity>
-  //       ),
-  //     })
-  //   }
-  // }, [navigation, noteDineIn])
+  useLayoutEffect(() => {
+    if (isPendingOrder) {
+      navigation.setOptions({
+        headerTitle: isPendingOrder ? noteDineIn : 'Detail Pesanan',
+        headerRight: () => (
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity
+              onPress={() => {
+                whatsappBill(item)
+              }}
+              style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
+              <AntDesign name="sharealt" size={18} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                modalSelectTypePrint?.current?.open()
+              }}
+              style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
+              <AntDesign name="printer" size={18} />
+              <Text type="semibold" size={8} style={{ marginLeft: 4 }}>
+                Cetak
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ),
+      })
+    }
+  }, [navigation, noteDineIn])
 
   return (
     <View style={styles.container}>
@@ -331,25 +311,27 @@ export default function CheckOut() {
               </TouchableOpacity>
             ))}
           </View>
+          {/* { Text Pelanggan Dihapus } */}
           <View style={styles.wrapTitle}>
             <Text type="semibold" size={10}>
               Pelanggan
             </Text>
-            {/* {!isPendingOrderChange && (
-              <TouchableOpacity onPress={handleCustomerChange}>
-                <Text type="semibold" size={7} color="#31AAC3">
-                  {isPendingOrder ? '' : 'Tambah pelanggan'}
-                </Text>
-              </TouchableOpacity>
-            )} */}
           </View>
-          <TextInput
-            disabled={!isPendingOrder}
-            style={{ height: 45 }}
-            placeholder="Nama Orang / Nomor Meja"
-            value={noteDineIn}
-            onChangeText={val => setNoteDineIn(val)}
-          />
+          <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around' }}>
+            <TextInput
+              style={{ height: 45, width: "50%" }}
+              placeholder="Nama Pelanggan"
+              value={noteDineIn}
+              onChangeText={val => setNoteDineIn(val)}
+            />
+            <TextInput
+              isNumber={true}
+              style={{ height: 45, width: "40%" }}
+              placeholder="Nomor Whatsapp"
+              value={phone_number}
+              onChangeText={val => setPhone_number(val)}
+            />
+          </View>
         </View>
         <View style={styles.wrapTitle}>
           <Text type="semibold" size={10}>
@@ -478,15 +460,17 @@ export default function CheckOut() {
         <View style={styles.rowBetween}>
           {!isPendingOrder || isPendingOrderChange ? (
             <Button
+              loading={noteDineIn == '' || phone_number == '' || isLoading}
               style={{ flex: 1, marginRight: 18, paddingHorizontal: 0, alignItems: 'center' }}
               mode="outlined"
               onPress={handleSaveChange}>
-              <Text type="bold" color={theme.colors.primary}>
+              <Text type="bold" color={noteDineIn == '' || phone_number == '' ? theme.colors.disabled : theme.colors.primary}>
                 Simpan Pesanan
               </Text>
             </Button>
           ) : null}
           <Button
+            loading={noteDineIn == '' || phone_number == '' || isLoading}
             style={{ flex: 1, paddingHorizontal: 0, alignItems: 'center' }}
             onPress={async () => {
               if (isPendingOrderChange) {
@@ -550,63 +534,6 @@ export default function CheckOut() {
                 loading={noteDineIn?.length <= 0 || isLoading}
                 style={{ flex: 1, paddingHorizontal: 0, alignItems: 'center' }}
                 onPress={handleHoldOrder}>
-                <Text type="bold" color="white">
-                  {isLoading ? 'Menyimpan...' : 'Simpan'}
-                </Text>
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
-      <Modal visible={showModalPelanggan} animationType="slide" transparent statusBarTranslucent>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: theme.colors.blackSemiTransparent,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <View
-            style={{
-              width: wp(90),
-              margin: 18,
-              backgroundColor: 'white',
-              paddingHorizontal: 16,
-              paddingTop: 16,
-              paddingBottom: 10,
-              borderRadius: 10,
-            }}>
-            <Text type="semibold" size={9}>
-              Simpan Pelanggan
-            </Text>
-            <TextInput
-              value={noteDineIn}
-              placeholder="Nama Orang / Nomor Meja"
-              onChangeText={text => setNoteDineIn(text)}
-            />
-            <TextInput
-              value={email}
-              placeholder="Alamat Email"
-              onChangeText={text => setEmail(text)}
-            />
-            <TextInput
-              value={phone_number}
-              placeholder="Nomor Handphone / Whatsapp"
-              onChangeText={text => setPhone_number(text)}
-            />
-            <View style={styles.rowBetween}>
-              <Button
-                style={{ flex: 1, marginRight: 8, paddingHorizontal: 0, alignItems: 'center' }}
-                mode="outlined"
-                onPress={() => setModalPelanggan(false)}>
-                <Text type="bold" color={theme.colors.primary}>
-                  Batal
-                </Text>
-              </Button>
-              <Button
-                loading={noteDineIn?.length <= 0 || isLoading}
-                style={{ flex: 1, paddingHorizontal: 0, alignItems: 'center' }}
-                onPress={handleHoldCustomer}>
                 <Text type="bold" color="white">
                   {isLoading ? 'Menyimpan...' : 'Simpan'}
                 </Text>

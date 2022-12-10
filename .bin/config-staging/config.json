@@ -1,6 +1,6 @@
 {
-  "appName": "TomSir",
-  "displayName": "TomSir (Staging)",
+  "appName": "POS-RaidiSolution",
+  "displayName": "POS-RaidiSolution (Staging)",
   "androidAppId": "id.tomsir.app.android.staging",
   "iosBundleId": "id.tomsir.app.ios.staging",
   "baseURL": "https://tomsir.fopini.id"
