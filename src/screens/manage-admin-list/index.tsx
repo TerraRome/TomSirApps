@@ -1,21 +1,21 @@
-import React, {useCallback, useEffect, useState} from 'react'
-import {View, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, RefreshControl, TextInput} from 'react-native'
-import {useIsFocused} from '@react-navigation/native'
-import {theme} from '@utils/theme'
-import Text from '@components/Text'
 import CustomButton from '@components/Button'
+import Text from '@components/Text'
+import { useIsFocused } from '@react-navigation/native'
+import { getUsers } from '@services/user'
+import { setUsers } from '@store/actions/user'
+import { theme } from '@utils/theme'
+import React, { useCallback, useEffect, useState } from 'react'
+import { FlatList, RefreshControl, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import {useSelector, useDispatch} from 'react-redux'
-import {getUsers} from '@services/user'
-import {setUsers} from '@store/actions/user'
+import { useDispatch, useSelector } from 'react-redux'
 
 let searchDebounce: any = null
-const ManageAdminList = ({navigation}: any) => {
+const ManageAdminList = ({ navigation }: any) => {
   const isFocused = useIsFocused()
   const dispatch = useDispatch()
   const [isLoading, setIsLoading] = useState(false)
-  const {rows, page_size, current_page} = useSelector((state: any) => state.users)
-  const {user} = useSelector((state: any) => state.auth)
+  const { rows, page_size, current_page } = useSelector((state: any) => state.users)
+  const { user } = useSelector((state: any) => state.auth)
 
   const [queryParams, setParams] = useState({
     page: 1,
@@ -31,7 +31,7 @@ const ManageAdminList = ({navigation}: any) => {
   }, [queryParams])
 
   const refreshData = (params?: any) => {
-    getData({page: 1, ...params})
+    getData({ page: 1, ...params })
   }
 
   const getData = useCallback(
@@ -42,10 +42,10 @@ const ManageAdminList = ({navigation}: any) => {
           delete queryParams.search
         }
         const {
-          data: {data},
-        } = await getUsers({...queryParams, ...params})
+          data: { data },
+        } = await getUsers({ ...queryParams, ...params })
         dispatch(setUsers(data))
-      } catch (error) {
+      } catch (error: any) {
         console.log(error.response)
       } finally {
         setIsLoading(false)
@@ -57,9 +57,9 @@ const ManageAdminList = ({navigation}: any) => {
   const handleSearch = (search: any) => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => {
-      refreshData({search})
+      refreshData({ search })
     }, 400)
-    setParams({...queryParams, search})
+    setParams({ ...queryParams, search })
   }
 
   const onPressUser = (item: any) => () => {
@@ -74,7 +74,7 @@ const ManageAdminList = ({navigation}: any) => {
     })
   }
 
-  const renderItem = ({item}: {item: any}) => {
+  const renderItem = ({ item }: { item: any }) => {
     return (
       <TouchableOpacity style={styles.productList} onPress={onPressUser(item)}>
         <Text size={9} type="regular">

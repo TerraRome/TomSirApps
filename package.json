@@ -1,9 +1,9 @@
 {
-  "name": "TomSir",
+  "name": "pos-raidisolution",
   "version": "0.0.1",
   "author": {
     "email": "feri.ferdinan79@gmail.com",
-    "name": "TomSir"
+    "name": "pos-raidisolution"
   },
   "private": true,
   "scripts": {

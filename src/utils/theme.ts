@@ -1,7 +1,7 @@
 export const theme: any = {
   colors: {
     background: '#fff',
-    primary: '#2ABEAD',
+    primary: '#0162AF',
     secondary: '#78C671',
     error: '#F83231',
     light: '#F8F8F8',

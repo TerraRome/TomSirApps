@@ -1,56 +1,45 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
-  TouchableOpacity,
-  StyleSheet,
-  View,
-  Image,
-  ScrollView,
-  TextInput as PureTextInput,
-  Modal,
-  FlatList,
-  Alert,
+  Alert, FlatList, Image, Modal, ScrollView, StyleSheet, TextInput as PureTextInput, TouchableOpacity, View
 } from 'react-native'
 
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
+import { theme } from '@utils/theme'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import {useDispatch, useSelector} from 'react-redux'
-import {theme} from '@utils/theme'
+import { useDispatch, useSelector } from 'react-redux'
 
-import WrapFooterButton from '@components/WrapFooterButton'
 import Button from '@components/Button'
-import TextInput from '@components/TextInput'
 import Loader from '@components/Loader'
 import Text from '@components/Text'
+import TextInput from '@components/TextInput'
+import WrapFooterButton from '@components/WrapFooterButton'
 //@ts-ignore
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native'
-import {convertToRupiah} from 'utils/convertRupiah'
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native'
+import { showErrorToast } from 'components/Toast'
+import { addCustomer } from 'services/customer'
+import { deleteOrder, getOrderById, Order, order, updateOrder } from 'services/order'
+import { setCarts } from 'store/actions/carts'
 import calculateCart from 'utils/calculateCart'
-import {changeOrderCarts} from 'store/actions/order'
-import {setCarts} from 'store/actions/carts'
-import {deleteOrder, getOrderById, Order, order, updateOrder} from 'services/order'
-import {addCustomer, getCustomer} from 'services/customer'
-import {showErrorToast} from 'components/Toast'
+import { convertToRupiah } from 'utils/convertRupiah'
 
-import {printBill} from '@utils/print-bill'
-import {printCheff} from '@utils/print-cheff'
+import { printBill } from '@utils/print-bill'
+import { printCheff } from '@utils/print-cheff'
 
 //@ts-ignore
-import {BluetoothManager} from 'react-native-bluetooth-escpos-printer'
 import Modalize from '@components/Modalize'
-import {setPrinter} from 'store/actions/apps'
-import {fetchBase64} from 'utils/fetch-blob'
-import {useLayoutEffect} from 'react'
+import { BluetoothManager } from 'react-native-bluetooth-escpos-printer'
+import { setPrinter } from 'store/actions/apps'
+import { fetchBase64 } from 'utils/fetch-blob'
 
 const PAYMENT_TYPE = [
-  {label: 'Debit', icon: 'money-check', id: 1},
-  {label: 'Cash', icon: 'money-bill-wave', id: 2},
-  {label: 'E-Wallet', icon: 'wallet', id: 3},
+  { label: 'Debit', icon: 'money-check', id: 1 },
+  { label: 'Cash', icon: 'money-bill-wave', id: 2 },
+  { label: 'E-Wallet', icon: 'wallet', id: 3 },
 ]
 
 const TYPE_ORDER = [
-  {label: 'Dine In', id: 'dine_in'},
-  {label: 'Take away', id: 'take_away'},
+  { label: 'Dine In', id: 'dine_in' },
+  { label: 'Take away', id: 'take_away' },
 ]
 
 export default function CheckOut() {
@@ -82,26 +71,26 @@ export default function CheckOut() {
   let carts =
     isPendingOrder && !isPendingOrderChange
       ? item?.transaction_product?.map((e: any) => ({
-          orderId,
-          cartId: e?.id,
-          id: e.product_id,
-          qty: e.qty,
-          note: e.note,
-          transaction_product_id: e?.id,
-          addons: e?.addons || [],
-          name: e.product.name,
-          description: e.product.description,
-          addon_category: e.product.addon_category,
-          ingredient: e.product.ingredient,
-          product: e.product,
-          image: e.product.image,
-          price: e.product.price,
-          disc: e.product.disc,
-          is_disc_percentage: e.product.is_disc_percentage,
-        })) || []
+        orderId,
+        cartId: e?.id,
+        id: e.product_id,
+        qty: e.qty,
+        note: e.note,
+        transaction_product_id: e?.id,
+        addons: e?.addons || [],
+        name: e.product.name,
+        description: e.product.description,
+        addon_category: e.product.addon_category,
+        ingredient: e.product.ingredient,
+        product: e.product,
+        image: e.product.image,
+        price: e.product.price,
+        disc: e.product.disc,
+        is_disc_percentage: e.product.is_disc_percentage,
+      })) || []
       : cartsState || []
 
-  console.log(cartsState, 'cartsState')
+  // console.log(cartsState, 'cartsState')
 
   const calculate = calculateCart(carts)
   const subTotalMinusDiscount = calculate.subtotal - calculate.discount
@@ -140,7 +129,7 @@ export default function CheckOut() {
       setModalSave(false)
       //@ts-ignore
       navigation.replace('OrderList')
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
     } finally {
       setLoading(false)
@@ -157,7 +146,7 @@ export default function CheckOut() {
     try {
       await addCustomer(formData)
       setModalPelanggan(false)
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
     } finally {
       setLoading(false)
@@ -171,7 +160,7 @@ export default function CheckOut() {
       await updateOrder(param)
       await getOrder()
       await dispatch(setCarts([]))
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
     } finally {
       setLoading(false)
@@ -182,13 +171,13 @@ export default function CheckOut() {
     setLoading(true)
     try {
       const {
-        data: {data},
+        data: { data },
       } = await getOrderById(orderId)
       setItem(data)
       setTypeOrder(data.type)
       setTax(data.tax_percentage)
       setNoteDineIn(data.note)
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
       navigation.goBack()
     } finally {
@@ -209,11 +198,11 @@ export default function CheckOut() {
       await BluetoothManager.connect(prnter.address)
       if (type === 'bill') {
         item.logo = merchant?.image ? await fetchBase64(merchant.image) : undefined
-        await printBill({...item, merchant})
+        await printBill({ ...item, merchant })
       } else {
-        await printCheff({...item, merchant})
+        await printCheff({ ...item, merchant })
       }
-    } catch (error) {
+    } catch (error: any) {
       dispatch(setPrinter(null))
       showErrorToast(error?.message || 'Failed, please connect or turn on printer')
     } finally {
@@ -229,12 +218,12 @@ export default function CheckOut() {
         onPress: async () => {
           if (isPendingOrderChange || isPendingOrder) {
             try {
-              const {status, data} = await deleteOrder(item.id)
+              const { status, data } = await deleteOrder(item.id)
               if (status === 200) {
                 return navigation.goBack()
               }
               showErrorToast(data?.message)
-            } catch (error) {
+            } catch (error: any) {
               showErrorToast(error.message)
             }
           } else {
@@ -294,32 +283,33 @@ export default function CheckOut() {
     }
   }, [isFocused])
 
-  useLayoutEffect(() => {
-    if (isPendingOrder) {
-      navigation.setOptions({
-        headerTitle: isPendingOrder ? noteDineIn : 'Detail Pesanan',
-        headerRight: () => (
-          <TouchableOpacity
-            onPress={() => {
-              modalSelectTypePrint?.current?.open()
-            }}
-            style={{marginRight: 18, flexDirection: 'row', alignItems: 'center'}}>
-            <AntDesign name="printer" size={18} />
-            <Text type="semibold" size={8} style={{marginLeft: 4}}>
-              Cetak
-            </Text>
-          </TouchableOpacity>
-        ),
-      })
-    }
-  }, [navigation, noteDineIn])
+  // { View Cetak Dihapus }
+  // useLayoutEffect(() => {
+  //   if (isPendingOrder) {
+  //     navigation.setOptions({
+  //       headerTitle: isPendingOrder ? noteDineIn : 'Detail Pesanan',
+  //       headerRight: () => (
+  //         <TouchableOpacity
+  //           onPress={() => {
+  //             modalSelectTypePrint?.current?.open()
+  //           }}
+  //           style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
+  //           <AntDesign name="printer" size={18} />
+  //           <Text type="semibold" size={8} style={{ marginLeft: 4 }}>
+  //             Cetak
+  //           </Text>
+  //         </TouchableOpacity>
+  //       ),
+  //     })
+  //   }
+  // }, [navigation, noteDineIn])
 
   return (
     <View style={styles.container}>
       <Loader loading={isLoading} />
-      <ScrollView style={{padding: 16}}>
-        <View style={{marginBottom: 16}}>
-          <Text type="semibold" size={10} style={{marginBottom: 16}}>
+      <ScrollView style={{ padding: 16 }}>
+        <View style={{ marginBottom: 16 }}>
+          <Text type="semibold" size={10} style={{ marginBottom: 16 }}>
             Tipe Order
           </Text>
           <View style={styles.wrapSelectTypeOrder}>
@@ -329,11 +319,11 @@ export default function CheckOut() {
                 onPress={() => {
                   setTypeOrder(e.id)
                 }}
-                disabled={e.id === typeOrder || isPendingOrder}
+                // disabled={e.id === typeOrder || isPendingOrder}
                 style={[
                   styles.selectButton,
                   {
-                    backgroundColor: e.id == typeOrder ? 'rgba(42,190,173,0.2)' : 'rgba(148,152,159,0.1)',
+                    backgroundColor: e.id == typeOrder ? 'white' : 'rgba(148,152,159,0.1)',
                     borderColor: e.id == typeOrder ? theme.colors.primary : 'transparent',
                   },
                 ]}>
@@ -342,20 +332,20 @@ export default function CheckOut() {
             ))}
           </View>
           <View style={styles.wrapTitle}>
-          <Text type="semibold" size={10}>
-            Pelanggan
-          </Text>
-          {!isPendingOrderChange && (
-            <TouchableOpacity onPress={handleCustomerChange}>
-              <Text type="semibold" size={7} color="#31AAC3">
-                {isPendingOrder ? 'Ubah' : 'Tambah'} pelanggan
-              </Text>
-            </TouchableOpacity>
-          )}
+            <Text type="semibold" size={10}>
+              Pelanggan
+            </Text>
+            {/* {!isPendingOrderChange && (
+              <TouchableOpacity onPress={handleCustomerChange}>
+                <Text type="semibold" size={7} color="#31AAC3">
+                  {isPendingOrder ? '' : 'Tambah pelanggan'}
+                </Text>
+              </TouchableOpacity>
+            )} */}
           </View>
           <TextInput
             disabled={!isPendingOrder}
-            style={{height: 45}}
+            style={{ height: 45 }}
             placeholder="Nama Orang / Nomor Meja"
             value={noteDineIn}
             onChangeText={val => setNoteDineIn(val)}
@@ -384,11 +374,11 @@ export default function CheckOut() {
               key={e?.cartId || e.id}
               activeOpacity={1}
               disabled={disabled}
-              onPress={() => navigation.navigate('DetailProduct', {item: e, cart: e})}
+              onPress={() => navigation.navigate('DetailProduct', { item: e, cart: e })}
               style={styles.item}>
-              <Image source={{uri: e.image}} style={styles.itemImage} />
-              <View style={[styles.rowBetween, {flex: 1}]}>
-                <View style={{flex: 0.8}}>
+              <Image source={{ uri: e.image }} style={styles.itemImage} />
+              <View style={[styles.rowBetween, { flex: 1 }]}>
+                <View style={{ flex: 0.8 }}>
                   <Text type="semibold" size={9}>
                     {e.name}
                   </Text>
@@ -410,7 +400,7 @@ export default function CheckOut() {
                 <View>
                   <Text>{convertToRupiah(discountPrice)}</Text>
                   {nominalDiscount > 0 && (
-                    <Text color="grey" style={{textDecorationLine: 'line-through'}}>
+                    <Text color="grey" style={{ textDecorationLine: 'line-through' }}>
                       {convertToRupiah(totalRealPriceItem)}
                     </Text>
                   )}
@@ -426,13 +416,14 @@ export default function CheckOut() {
           </View>
           <View style={styles.rowBetween}>
             <Text>Pajak</Text>
-            <View style={{flexDirection: 'row'}}>
+            <View style={{ flexDirection: 'row' }}>
               <PureTextInput
                 style={styles.taxInput}
                 placeholder="0"
                 keyboardType="numeric"
                 maxLength={3}
-                value={tax}
+                value={tax.toString()}
+
                 onChangeText={text => {
                   let newText = text ? parseInt(text.replace(/[^0-9]/g, ''), 0).toString() : ''
                   setTax(newText)
@@ -447,7 +438,7 @@ export default function CheckOut() {
             <Text>{convertToRupiah(total)}</Text>
           </View>
         </View>
-        <View style={{marginVertical: 20}}>
+        <View style={{ marginVertical: 20 }}>
           <Text type="semibold" size={10}>
             Cara Bayar
           </Text>
@@ -459,19 +450,19 @@ export default function CheckOut() {
                 style={[
                   styles.selectButton,
                   {
-                    backgroundColor: e.id == 2 ? 'rgba(42,190,173,0.2)' : 'rgba(148,152,159,0.1)',
+                    backgroundColor: e.id == 2 ? 'white' : 'rgba(148,152,159,0.1)',
                     borderColor: e.id == 2 ? theme.colors.primary : 'transparent',
                   },
                 ]}>
                 <FontAwesome5 name={e.icon} size={18} color={e.id === 2 ? theme.colors.primary : theme.colors.grey} />
-                <Text style={{marginTop: 4}} color={e.id === 2 ? theme.colors.primary : theme.colors.grey}>
+                <Text style={{ marginTop: 4 }} color={e.id === 2 ? theme.colors.primary : theme.colors.grey}>
                   {e.label}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
-        <View style={{alignItems: 'center', marginBottom: 50, marginTop: 30}}>
+        <View style={{ alignItems: 'center', marginBottom: 50, marginTop: 30 }}>
           <TouchableOpacity onPress={handleDeleteOrder}>
             <Text color="#EF6454">Hapus Pesanan</Text>
           </TouchableOpacity>
@@ -487,7 +478,7 @@ export default function CheckOut() {
         <View style={styles.rowBetween}>
           {!isPendingOrder || isPendingOrderChange ? (
             <Button
-              style={{flex: 1, marginRight: 18, paddingHorizontal: 0, alignItems: 'center'}}
+              style={{ flex: 1, marginRight: 18, paddingHorizontal: 0, alignItems: 'center' }}
               mode="outlined"
               onPress={handleSaveChange}>
               <Text type="bold" color={theme.colors.primary}>
@@ -496,7 +487,7 @@ export default function CheckOut() {
             </Button>
           ) : null}
           <Button
-            style={{flex: 1, paddingHorizontal: 0, alignItems: 'center'}}
+            style={{ flex: 1, paddingHorizontal: 0, alignItems: 'center' }}
             onPress={async () => {
               if (isPendingOrderChange) {
                 await handleUpdateOrder()
@@ -548,7 +539,7 @@ export default function CheckOut() {
             />
             <View style={styles.rowBetween}>
               <Button
-                style={{flex: 1, marginRight: 8, paddingHorizontal: 0, alignItems: 'center'}}
+                style={{ flex: 1, marginRight: 8, paddingHorizontal: 0, alignItems: 'center' }}
                 mode="outlined"
                 onPress={() => setModalSave(false)}>
                 <Text type="bold" color={theme.colors.primary}>
@@ -557,7 +548,7 @@ export default function CheckOut() {
               </Button>
               <Button
                 loading={noteDineIn?.length <= 0 || isLoading}
-                style={{flex: 1, paddingHorizontal: 0, alignItems: 'center'}}
+                style={{ flex: 1, paddingHorizontal: 0, alignItems: 'center' }}
                 onPress={handleHoldOrder}>
                 <Text type="bold" color="white">
                   {isLoading ? 'Menyimpan...' : 'Simpan'}
@@ -605,7 +596,7 @@ export default function CheckOut() {
             />
             <View style={styles.rowBetween}>
               <Button
-                style={{flex: 1, marginRight: 8, paddingHorizontal: 0, alignItems: 'center'}}
+                style={{ flex: 1, marginRight: 8, paddingHorizontal: 0, alignItems: 'center' }}
                 mode="outlined"
                 onPress={() => setModalPelanggan(false)}>
                 <Text type="bold" color={theme.colors.primary}>
@@ -614,7 +605,7 @@ export default function CheckOut() {
               </Button>
               <Button
                 loading={noteDineIn?.length <= 0 || isLoading}
-                style={{flex: 1, paddingHorizontal: 0, alignItems: 'center'}}
+                style={{ flex: 1, paddingHorizontal: 0, alignItems: 'center' }}
                 onPress={handleHoldCustomer}>
                 <Text type="bold" color="white">
                   {isLoading ? 'Menyimpan...' : 'Simpan'}
@@ -625,14 +616,14 @@ export default function CheckOut() {
         </View>
       </Modal>
       <Modalize ref={modalSelectPrinter}>
-        <View style={{padding: 16}}>
+        <View style={{ padding: 16 }}>
           <Text type="semibold" size={10}>
             Pilih Printer
           </Text>
           <FlatList
             data={listPrinter}
             keyExtractor={(item: any) => item.name + item.id}
-            renderItem={({item: p}: any) => (
+            renderItem={({ item: p }: any) => (
               <TouchableOpacity
                 key={p.address}
                 activeOpacity={0.5}
@@ -653,7 +644,7 @@ export default function CheckOut() {
         </View>
       </Modalize>
       <Modalize ref={modalSelectTypePrint}>
-        <View style={{padding: 16}}>
+        <View style={{ padding: 16 }}>
           <Text type="semibold" size={10}>
             Pilih
           </Text>
@@ -669,7 +660,7 @@ export default function CheckOut() {
               },
             ]}
             keyExtractor={(item: any) => item.value}
-            renderItem={({item: e}: any) => (
+            renderItem={({ item: e }: any) => (
               <TouchableOpacity
                 key={e.value}
                 activeOpacity={0.5}
@@ -691,7 +682,7 @@ export default function CheckOut() {
   )
 }
 const DashSeparator = () => (
-  <View style={{flexDirection: 'row'}}>
+  <View style={{ flexDirection: 'row' }}>
     {Array(parseInt(wp(12).toString(), 0))
       .fill(0)
       .map((e: any, i: any) => (
@@ -708,14 +699,14 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flex: 1,
   },
-  center: {alignSelf: 'center'},
+  center: { alignSelf: 'center' },
   footer: {
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
-  emptyImage: {width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain'},
+  emptyImage: { width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain' },
   checkoutButton: {
     justifyContent: 'space-between',
     flexDirection: 'row',
@@ -739,7 +730,7 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.defaultBorderColor,
     borderBottomWidth: 1,
   },
-  itemImage: {width: 70, height: 60, marginRight: 10, borderRadius: 10},
+  itemImage: { width: 70, height: 60, marginRight: 10, borderRadius: 10 },
   selectButton: {
     flex: 1,
     paddingVertical: 10,
@@ -749,11 +740,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  wrapSelectTypeOrder: {flexDirection: 'row', marginHorizontal: -8, marginBottom: 6},
-  wrapTotal: {flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3},
-  wrapSelectPayment: {flexDirection: 'row', marginHorizontal: -8, marginVertical: 10},
-  rowBetween: {flexDirection: 'row', justifyContent: 'space-between'},
-  wrapTitle: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20},
+  wrapSelectTypeOrder: { flexDirection: 'row', marginHorizontal: -8, marginBottom: 6 },
+  wrapTotal: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 },
+  wrapSelectPayment: { flexDirection: 'row', marginHorizontal: -8, marginVertical: 10 },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
+  wrapTitle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
   filterItem: {
     paddingVertical: 10,
     borderBottomWidth: 0.5,

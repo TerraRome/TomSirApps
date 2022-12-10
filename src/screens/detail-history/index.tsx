@@ -1,30 +1,30 @@
-import React, {useState, useEffect, useRef} from 'react'
-import {TouchableOpacity, StyleSheet, View, ScrollView, FlatList} from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
-import {useDispatch, useSelector} from 'react-redux'
-import {theme} from '@utils/theme'
+import { theme } from '@utils/theme'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { useDispatch, useSelector } from 'react-redux'
 
-import WrapFooterButton from '@components/WrapFooterButton'
 import Button from '@components/Button'
 import Loader from '@components/Loader'
 import Text from '@components/Text'
+import WrapFooterButton from '@components/WrapFooterButton'
 //@ts-ignore
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native'
-import {convertToRupiah} from '@utils/convertRupiah'
+import { showErrorToast } from '@components/Toast'
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native'
+import { getReportById } from '@services/report'
 import calculateCart from '@utils/calculateCart'
-import {getReportById} from '@services/report'
-import {showErrorToast} from '@components/Toast'
+import { convertToRupiah } from '@utils/convertRupiah'
 
-import {printBill} from '@utils/print-bill'
+import { printBill } from '@utils/print-bill'
 
 //@ts-ignore
-import {BluetoothManager} from 'react-native-bluetooth-escpos-printer'
-import {Modalize} from 'react-native-modalize'
-import {setPrinter} from 'store/actions/apps'
-import {fetchBase64} from 'utils/fetch-blob'
-import {useLayoutEffect} from 'react'
 import moment from 'moment'
+import { useLayoutEffect } from 'react'
+import { BluetoothManager } from 'react-native-bluetooth-escpos-printer'
+import { Modalize } from 'react-native-modalize'
+import { setPrinter } from 'store/actions/apps'
+import { fetchBase64 } from 'utils/fetch-blob'
 
 export default function DetailHistory() {
   const navigation = useNavigation()
@@ -66,10 +66,10 @@ export default function DetailHistory() {
     setLoading(true)
     try {
       const {
-        data: {data},
+        data: { data },
       } = await getReportById(item.id)
       setItem(data)
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
     } finally {
       setLoading(false)
@@ -88,7 +88,7 @@ export default function DetailHistory() {
       setLoading(true)
       await BluetoothManager.connect(prnter.address)
       item.logo = merchant?.image ? await fetchBase64(merchant.image) : undefined
-      await printBill({...item, merchant})
+      await printBill({ ...item, merchant })
     } catch (error) {
       showErrorToast(error?.message || 'Failed, please connect or turn on printer')
       dispatch(setPrinter(null))
@@ -111,26 +111,26 @@ export default function DetailHistory() {
   return (
     <View style={styles.container}>
       <Loader loading={isLoading} />
-      <ScrollView style={{padding: 16}}>
+      <ScrollView style={{ padding: 16 }}>
         <View style={styles.wrapTitle}>
           <Text type="bold" size={10}>
             Detail
           </Text>
         </View>
-        <View style={{marginBottom: 16}}>
-          <View style={[styles.rowBetween, {marginVertical: 3}]}>
+        <View style={{ marginBottom: 16 }}>
+          <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Tanggal</Text>
             <Text type="semibold">{moment(item?.createdAt).format('DD MMM YYYY HH:mm') || ' - '}</Text>
           </View>
-          <View style={[styles.rowBetween, {marginVertical: 3}]}>
+          <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Catatan</Text>
             <Text type="semibold">{item?.note || ' - '}</Text>
           </View>
-          <View style={[styles.rowBetween, {marginVertical: 3}]}>
+          <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Tipe Order</Text>
             <Text type="semibold">{item?.type === 'dine_in' ? 'Dine In' : 'Take Away'}</Text>
           </View>
-          <View style={[styles.rowBetween, {marginVertical: 3}]}>
+          <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Metode Pembayaran</Text>
             <Text type="semibold">{item?.payment_type || ' - '}</Text>
           </View>
@@ -147,8 +147,8 @@ export default function DetailHistory() {
           const discountPrice = totalRealPriceItem - nominalDiscount * e?.qty
           return (
             <View key={e?.cartId || e.id} style={styles.item}>
-              <View style={[styles.rowBetween, {flex: 1}]}>
-                <View style={{flex: 0.8}}>
+              <View style={[styles.rowBetween, { flex: 1 }]}>
+                <View style={{ flex: 0.8 }}>
                   <Text type="semibold" size={9}>
                     x{e.qty} {e.name}
                   </Text>
@@ -162,7 +162,7 @@ export default function DetailHistory() {
                 <View>
                   <Text>{convertToRupiah(discountPrice)}</Text>
                   {nominalDiscount > 0 && (
-                    <Text color="grey" style={{textDecorationLine: 'line-through'}}>
+                    <Text color="grey" style={{ textDecorationLine: 'line-through' }}>
                       {convertToRupiah(totalRealPriceItem)}
                     </Text>
                   )}
@@ -205,16 +205,16 @@ export default function DetailHistory() {
           )}
         </View>
         <DashSeparator />
-        <View style={{marginVertical: 16}}>
-          <View style={[styles.rowBetween, {marginVertical: 3}]}>
+        <View style={{ marginVertical: 16 }}>
+          <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Total Modal</Text>
             <Text type="semibold">{convertToRupiah(item?.total_capital || '0')}</Text>
           </View>
-          <View style={[styles.rowBetween, {marginVertical: 3}]}>
+          <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Total Laba</Text>
             <Text type="semibold">{convertToRupiah(item?.profit || '0')}</Text>
           </View>
-          <View style={[styles.rowBetween, {marginVertical: 3}]}>
+          <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Total Quantity</Text>
             <Text type="semibold">{item?.total_qty || ' - '}</Text>
           </View>
@@ -227,15 +227,15 @@ export default function DetailHistory() {
           </Text>
         </Button>
       </WrapFooterButton>
-      <Modalize adjustToContentHeight rootStyle={{elevation: 99}} ref={modalSelectPrinter}>
-        <View style={{padding: 16}}>
+      <Modalize adjustToContentHeight rootStyle={{ elevation: 99 }} ref={modalSelectPrinter}>
+        <View style={{ padding: 16 }}>
           <Text type="semibold" size={10}>
             Pilih Printer
           </Text>
           <FlatList
             data={listPrinter}
             keyExtractor={(item: any) => item.address}
-            renderItem={({item: p}: any) => (
+            renderItem={({ item: p }: any) => (
               <TouchableOpacity
                 key={p.address}
                 activeOpacity={0.5}
@@ -260,7 +260,7 @@ export default function DetailHistory() {
   )
 }
 const DashSeparator = () => (
-  <View style={{flexDirection: 'row'}}>
+  <View style={{ flexDirection: 'row' }}>
     {Array(parseInt(wp(12).toString(), 0))
       .fill(0)
       .map((e: any, i: any) => (
@@ -277,14 +277,14 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flex: 1,
   },
-  center: {alignSelf: 'center'},
+  center: { alignSelf: 'center' },
   footer: {
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
-  emptyImage: {width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain'},
+  emptyImage: { width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain' },
   checkoutButton: {
     justifyContent: 'space-between',
     flexDirection: 'row',
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.defaultBorderColor,
     borderBottomWidth: 1,
   },
-  itemImage: {width: 70, height: 60, marginRight: 10, borderRadius: 10},
+  itemImage: { width: 70, height: 60, marginRight: 10, borderRadius: 10 },
   selectButton: {
     flex: 1,
     paddingVertical: 10,
@@ -318,11 +318,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  wrapSelectTypeOrder: {flexDirection: 'row', marginHorizontal: -8, marginBottom: 6},
-  wrapTotal: {flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3},
-  wrapSelectPayment: {flexDirection: 'row', marginHorizontal: -8, marginVertical: 10},
-  rowBetween: {flexDirection: 'row', justifyContent: 'space-between'},
-  wrapTitle: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8},
+  wrapSelectTypeOrder: { flexDirection: 'row', marginHorizontal: -8, marginBottom: 6 },
+  wrapTotal: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 },
+  wrapSelectPayment: { flexDirection: 'row', marginHorizontal: -8, marginVertical: 10 },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
+  wrapTitle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   filterItem: {
     paddingVertical: 10,
     borderBottomWidth: 0.5,

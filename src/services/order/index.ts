@@ -1,6 +1,6 @@
+import Axios from '@utils/Axios'
 import {AxiosResponse} from 'axios'
 import qs from 'query-string'
-import Axios from '@utils/Axios'
 
 export interface Product {
   id: string
@@ -147,6 +147,7 @@ export const getOrderList = async (params: {
   sortBy?: 'type' | 'code' | 'createdAt'
   order?: 'ASC' | 'DESC'
   status?: 'hold' | 'paid'
+  merchant_id: string
   search?: string
 }): Promise<AxiosResponse> => {
   return await Axios.get(`api/v1/order?${qs.stringify(params)}`)
@@ -160,19 +161,27 @@ export const order = async (data: Order): Promise<AxiosResponse<IResOrder>> => {
   return await Axios.post('api/v1/order', data)
 }
 
-export const updateOrder = async (data: Order): Promise<AxiosResponse<IResOrder>> => {
+export const updateOrder = async (
+  data: Order,
+): Promise<AxiosResponse<IResOrder>> => {
   return await Axios.put(`api/v1/order/${data.id}`, data)
 }
 
-export const addProductOrder = async (data: IAddProductOrder): Promise<AxiosResponse> => {
+export const addProductOrder = async (
+  data: IAddProductOrder,
+): Promise<AxiosResponse> => {
   return await Axios.post('api/v1/order/product', data)
 }
 
-export const updateProductOrder = async (data: Product): Promise<AxiosResponse> => {
+export const updateProductOrder = async (
+  data: Product,
+): Promise<AxiosResponse> => {
   return await Axios.put(`api/v1/order/product/${data.id}`, data)
 }
 
-export const deleteProductOrder = async (data: Product): Promise<AxiosResponse> => {
+export const deleteProductOrder = async (
+  data: Product,
+): Promise<AxiosResponse> => {
   return await Axios.delete(`api/v1/order/product/${data.id}`)
 }
 
@@ -180,6 +189,8 @@ export const deleteOrder = async (id: string): Promise<AxiosResponse> => {
   return await Axios.delete(`api/v1/order/${id}`)
 }
 
-export const payOrder = async (data: OrderPay): Promise<AxiosResponse<IResOrder>> => {
+export const payOrder = async (
+  data: OrderPay,
+): Promise<AxiosResponse<IResOrder>> => {
   return await Axios.post('api/v1/order/pay', data)
 }

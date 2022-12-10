@@ -1,17 +1,16 @@
-import React, {useState} from 'react'
-import {Platform, StyleSheet, KeyboardAvoidingView, View, ScrollView} from 'react-native'
-import Text from '@components/Text'
 import Button from '@components/Button'
-import {showErrorToast} from '@components/Toast'
-import {useDispatch} from 'react-redux'
-import {theme} from '@utils/theme'
-import {emailValidator, passwordValidator} from '@utils/validators'
-import {setAuth} from '@store/actions/auth'
+import Text from '@components/Text'
 import TextInput from '@components/TextInput'
+import { showErrorToast } from '@components/Toast'
+import { setAuth } from '@store/actions/auth'
+import { theme } from '@utils/theme'
+import { emailValidator, passwordValidator } from '@utils/validators'
 import Logo from 'components/Logo'
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
-import {signin} from 'services/auth'
-import { TouchableOpacity } from 'react-native-gesture-handler'
+import React, { useState } from 'react'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { useDispatch } from 'react-redux'
+import { signin } from 'services/auth'
 
 export default function Login() {
   const dispatch = useDispatch()
@@ -19,22 +18,22 @@ export default function Login() {
     value: '',
     error: '',
   })
-  const [password, setPassword] = useState({value: '', error: ''})
+  const [password, setPassword] = useState({ value: '', error: '' })
   const [isLoading, setLoading] = useState(false)
 
   const signInWithEmailAndPassword = async () => {
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
     if (emailError || passwordError) {
-      setEmail({...email, error: emailError})
-      setPassword({...password, error: passwordError})
+      setEmail({ ...email, error: emailError })
+      setPassword({ ...password, error: passwordError })
       return
     }
     setLoading(true)
     try {
       const {
-        data: {data},
-      } = await signin({email: email.value, password: password.value})
+        data: { data },
+      } = await signin({ email: email.value, password: password.value })
       if (data?.token) {
         dispatch(setAuth(data))
       }
@@ -49,25 +48,22 @@ export default function Login() {
     <View style={styles.container}>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.contentContainerStyle}>
         <KeyboardAvoidingView
-          style={{marginBottom: wp(20)}}
+          style={{ marginBottom: wp(20) }}
           keyboardVerticalOffset={20}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <Logo source={require('@assets/images/logo2.png')} style={styles.logo} />
-          <Text style={styles.title} type="bold" size={14}>
-            TomSir
-          </Text>
-          <Text style={[styles.title, {marginBottom: 32}]}>Silahkan masuk</Text>
+          <Text style={[styles.title, { marginBottom: 32 }]}>Silahkan masuk</Text>
           <TextInput
             value={email.value}
             errorText={email.error}
             placeholder="Ketik email anda"
-            onChangeText={value => setEmail({value, error: ''})}
+            onChangeText={value => setEmail({ value, error: '' })}
           />
           <TextInput
             value={password.value}
             errorText={password.error}
             placeholder="Ketik password anda"
-            onChangeText={value => setPassword({value, error: ''})}
+            onChangeText={value => setPassword({ value, error: '' })}
             isPassword
           />
           <Button loading={isLoading} onPress={signInWithEmailAndPassword}>
@@ -75,12 +71,12 @@ export default function Login() {
               {isLoading ? 'Memuat...' : 'Log In'}
             </Text>
           </Button>
-          <View style={[styles.row, {alignSelf: 'center'}]}>
+          {/* <View style={[styles.row, { alignSelf: 'center' }]}>
             <Text style={styles.label}>Tidak punya akun? </Text>
-            <TouchableOpacity onPress={() => {}}>
-                <Text style={styles.link}>Register</Text>
+            <TouchableOpacity onPress={() => { }}>
+              <Text style={styles.link}>Register</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
         </KeyboardAvoidingView>
       </ScrollView>
     </View>
@@ -132,5 +128,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: theme.colors.primary,
   },
-  logo: {alignSelf: 'center', height: wp(35), top: 10},
+  logo: { alignSelf: 'center', height: wp(35), top: 10 },
 })

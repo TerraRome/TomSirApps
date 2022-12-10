@@ -2,15 +2,16 @@ import React from 'react'
 
 import Routes from './src/routes'
 
-import {StatusBar} from 'react-native'
+import { LogBox, StatusBar } from 'react-native'
 
-import {Provider} from 'react-redux'
-import 'react-native-gesture-handler'
-import {PersistGate} from 'redux-persist/integration/react'
 import FlashMessage from 'react-native-flash-message'
+import 'react-native-gesture-handler'
+import { Provider } from 'react-redux'
+import { PersistGate } from 'redux-persist/integration/react'
 
-import {store, persistor} from '@store/store'
-import {theme} from '@utils/theme'
+import { persistor, store } from '@store/store'
+
+LogBox.ignoreAllLogs();
 
 function App() {
   return (

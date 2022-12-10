@@ -1,36 +1,30 @@
-import React, {useLayoutEffect, useEffect, useState, useCallback} from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import {
-  TouchableOpacity,
-  StyleSheet,
-  View,
-  Image,
+  Alert, Image,
   ScrollView,
-  StatusBar,
-  TextInput as PureTextInput,
-  Alert,
+  StatusBar, StyleSheet, TextInput as PureTextInput, TouchableOpacity, View
 } from 'react-native'
 
-import {heightPercentageToDP as hp, widthPercentageToDP as wp} from 'react-native-responsive-screen'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import { theme } from '@utils/theme'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import Entypo from 'react-native-vector-icons/Entypo'
-import {useSelector, useDispatch} from 'react-redux'
-import {theme} from '@utils/theme'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import { useDispatch } from 'react-redux'
 
-import WrapFooterButton from '@components/WrapFooterButton'
 import BackButton from '@components/BackButton'
 import Button from '@components/Button'
 import Text from '@components/Text'
-import {useNavigation, useRoute} from '@react-navigation/native'
-import {changeCartItem, removeCartItem} from 'store/actions/carts'
-import TextInput from 'components/TextInput'
-import {convertToAngka, convertToRupiah} from 'utils/convertRupiah'
-import {getProduct} from 'services/products'
-import {showErrorToast} from 'components/Toast'
+import WrapFooterButton from '@components/WrapFooterButton'
 import CheckBox from '@react-native-community/checkbox'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import TextInput from 'components/TextInput'
+import { showErrorToast } from 'components/Toast'
+import { getProduct } from 'services/products'
+import { changeCartItem, removeCartItem } from 'store/actions/carts'
+import { convertToRupiah } from 'utils/convertRupiah'
 //@ts-ignore
-import {RadioButtonInput} from 'react-native-simple-radio-button'
+import { RadioButtonInput } from 'react-native-simple-radio-button'
 
 export default function DetailProduct() {
   const dispatch = useDispatch()
@@ -63,7 +57,7 @@ export default function DetailProduct() {
     return expired
   })
 
-  console.log(expiredIngredient)
+  // console.log(expiredIngredient)
 
   const discountPrice = parseFloat(item.price) - nominalDiscount
 
@@ -72,7 +66,7 @@ export default function DetailProduct() {
   const getData = useCallback(async () => {
     try {
       const {
-        data: {data},
+        data: { data },
       } = await getProduct(item.id)
       setProduct(data)
     } catch (error) {
@@ -92,7 +86,7 @@ export default function DetailProduct() {
     } else {
       addons.push(paramItem)
     }
-    setState({...state, addons})
+    setState({ ...state, addons })
   }
 
   useEffect(() => {
@@ -109,7 +103,7 @@ export default function DetailProduct() {
     })
   }, [navigation])
 
-  const showAlert = ({title, subtitle}: {title: string; subtitle: string}) => {
+  const showAlert = ({ title, subtitle }: { title: string; subtitle: string }) => {
     return Alert.alert(
       title,
       subtitle,
@@ -173,11 +167,11 @@ export default function DetailProduct() {
             <Ionicons name="ios-image-outline" size={50} color={theme.colors.grey} />
           </View>
         ) : (
-          <Image source={{uri: item?.image}} style={{width: wp(100), height: 250}} />
+          <Image source={{ uri: item?.image }} style={{ width: wp(100), height: 250 }} />
         )}
-        <View style={{padding: 16, backgroundColor: '#F2F3F4'}}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text type="semibold" style={{flex: 0.9}} size={10}>
+        <View style={{ padding: 16, backgroundColor: '#F2F3F4' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text type="semibold" style={{ flex: 0.9 }} size={10}>
               {product?.name}
             </Text>
             <Text type="semibold" size={10}>
@@ -185,18 +179,18 @@ export default function DetailProduct() {
             </Text>
           </View>
           {product?.disc > 0 && (
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8}}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
               <Text size={7}>
                 Diskon {product?.is_disc_percentage ? `${product?.disc}%` : `Rp ${convertToRupiah(product?.disc)}`}
               </Text>
-              <Text style={{textDecorationLine: 'line-through'}} color="#A0A0A0" size={8}>
+              <Text style={{ textDecorationLine: 'line-through' }} color="#A0A0A0" size={8}>
                 {convertToRupiah(product?.price)}
               </Text>
             </View>
           )}
           <Text color="#A0A0A0">{product?.description}</Text>
         </View>
-        <View style={{padding: 16}}>
+        <View style={{ padding: 16 }}>
           <View>
             {product?.addon_category?.map((e: any) => {
               const maxLimit = e?.max_limit
@@ -208,13 +202,13 @@ export default function DetailProduct() {
                   <Text color="#A0A0A0" size={7}>
                     {e?.isRequired ? 'Wajib' : 'Tidak wajib'}, {maxLimit > 1 ? `Max ${maxLimit}` : `Pilih ${maxLimit}`}
                   </Text>
-                  <View style={{marginVertical: 8}}>
+                  <View style={{ marginVertical: 8 }}>
                     {e.addon_menu.map((a: any, i: any) => {
                       const selected = !!state?.addons?.find((m: any) => m.id === a.id)
                       const disabled = Boolean(
                         !selected &&
-                          parseInt(e?.max_limit) ===
-                            state?.addons.filter((an: any) => an.addon_category_id === e.id)?.length,
+                        parseInt(e?.max_limit) ===
+                        state?.addons.filter((an: any) => an.addon_category_id === e.id)?.length,
                       )
                       a.max_limit = maxLimit
                       return (
@@ -225,12 +219,12 @@ export default function DetailProduct() {
                             handleSelectMenu(selected, a)
                           }}
                           style={styles.itemSelectVariant}>
-                          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             {maxLimit > 1 ? (
                               <CheckBox
                                 disabled={disabled}
-                                style={{marginRight: 8}}
-                                tintColors={{true: theme.colors.primary}}
+                                style={{ marginRight: 8 }}
+                                tintColors={{ true: theme.colors.primary }}
                                 onTintColor={theme.colors.grey2}
                                 onFillColor={theme.colors.grey2}
                                 onCheckColor={theme.colors.white}
@@ -245,7 +239,7 @@ export default function DetailProduct() {
                             ) : (
                               <RadioButtonInput
                                 index={i}
-                                obj={{value: a}}
+                                obj={{ value: a }}
                                 isSelected={selected}
                                 onPress={() => {
                                   handleSelectMenu(selected, a)
@@ -255,7 +249,7 @@ export default function DetailProduct() {
                                 buttonOuterColor={selected ? theme.colors.primary : theme.colors.grey2}
                                 buttonSize={12}
                                 buttonOuterSize={22}
-                                buttonWrapStyle={{marginHorizontal: 12, marginVertical: 4, marginLeft: 5}}
+                                buttonWrapStyle={{ marginHorizontal: 12, marginVertical: 4, marginLeft: 5 }}
                               />
                             )}
                             <Text
@@ -283,15 +277,15 @@ export default function DetailProduct() {
             Tidak wajib
           </Text>
           <TextInput
-            style={{marginTop: 6}}
+            style={{ marginTop: 6 }}
             value={state?.note}
             placeholder="Mis. Gulanya jangan banyak2 yaa.."
             onChangeText={note => {
-              setState({...state, note})
+              setState({ ...state, note })
             }}
           />
           {!!product?.ingredient.length && (
-            <Text type="semibold" size={9} style={{paddingTop: 16, paddingBottom: 6}}>
+            <Text type="semibold" size={9} style={{ paddingTop: 16, paddingBottom: 6 }}>
               Bahan Tersedia
             </Text>
           )}
@@ -299,7 +293,7 @@ export default function DetailProduct() {
             const outOfStock = e.stock < e.tbl_product_ingredient.qty * parseInt(state.qty)
             const expired = e.exp_date ? new Date() > new Date(e.exp_date) : false
             return (
-              <View style={{flexDirection: 'row', paddingVertical: 6}}>
+              <View style={{ flexDirection: 'row', paddingVertical: 6 }}>
                 <View
                   style={{
                     height: 25,
@@ -311,8 +305,8 @@ export default function DetailProduct() {
                     borderColor: expired
                       ? theme.colors.error
                       : outOfStock
-                      ? theme.colors.warning
-                      : theme.colors.primary,
+                        ? theme.colors.warning
+                        : theme.colors.primary,
                   }}>
                   <FontAwesome
                     name={expired ? 'close' : outOfStock ? 'exclamation' : 'check'}
@@ -322,26 +316,26 @@ export default function DetailProduct() {
                 </View>
                 <Text
                   size={8}
-                  style={{paddingLeft: 8, alignSelf: 'center', textDecorationLine: expired ? 'line-through' : 'none'}}>
+                  style={{ paddingLeft: 8, alignSelf: 'center', textDecorationLine: expired ? 'line-through' : 'none' }}>
                   {e.name}
                 </Text>
               </View>
             )
           })}
         </View>
-        <View style={{alignItems: 'center', marginVertical: 16}}>
-          <View style={{flexDirection: 'row', marginBottom: 64}}>
+        <View style={{ alignItems: 'center', marginVertical: 16 }}>
+          <View style={{ flexDirection: 'row', marginBottom: 64 }}>
             <TouchableOpacity
               style={styles.buttonQty}
               onPress={() => {
                 if (state?.qty === 0) {
                   return
                 }
-                setState({...state, qty: parseInt(state.qty) - 1})
+                setState({ ...state, qty: parseInt(state.qty) - 1 })
               }}>
               <Entypo color={theme.colors.primary} name="minus" size={28} />
             </TouchableOpacity>
-            <View style={{width: 60, justifyContent: 'center', alignItems: 'center'}}>
+            <View style={{ width: 60, justifyContent: 'center', alignItems: 'center' }}>
               <PureTextInput
                 value={state?.qty}
                 placeholder={state?.qty?.toString() || '0'}
@@ -351,13 +345,13 @@ export default function DetailProduct() {
                 keyboardType="numeric"
                 onChangeText={text => {
                   let newText = text ? parseInt(text.replace(/[^0-9]/g, ''), 0).toString() : ''
-                  setState({...state, qty: newText})
+                  setState({ ...state, qty: newText })
                 }}
               />
             </View>
             <TouchableOpacity
               onPress={() => {
-                setState({...state, qty: parseInt(state.qty) + 1})
+                setState({ ...state, qty: parseInt(state.qty) + 1 })
               }}
               style={styles.buttonQty}>
               <Entypo color={theme.colors.primary} name="plus" size={28} />
@@ -383,7 +377,7 @@ export default function DetailProduct() {
           </Button>
         ) : (
           <Button
-            style={{backgroundColor: cart ? '#EF6454' : theme.colors.primary}}
+            style={{ backgroundColor: cart ? '#EF6454' : theme.colors.primary }}
             onPress={() => {
               if (cart) {
                 dispatch(removeCartItem(cart))
@@ -405,14 +399,14 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.white,
     flex: 1,
   },
-  center: {alignSelf: 'center'},
+  center: { alignSelf: 'center' },
   footer: {
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
-  emptyImage: {width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain'},
+  emptyImage: { width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain' },
   checkoutButton: {
     justifyContent: 'space-between',
     flexDirection: 'row',

@@ -1,26 +1,26 @@
-import React, {useState} from 'react'
-import {StyleSheet, View, ScrollView, Dimensions} from 'react-native'
-import Text from '@components/Text'
 import Button from '@components/Button'
+import Text from '@components/Text'
 import WrapFooterButton from '@components/WrapFooterButton'
-import {useDispatch} from 'react-redux'
-import {theme} from '@utils/theme'
-import {RFValue as fs} from 'react-native-responsive-fontsize'
-import {convertToRupiah} from 'utils/convertRupiah'
-import {useNavigation, useRoute} from '@react-navigation/native'
-import {IResOrder, Order, order, OrderPay, payOrder} from 'services/order'
-import {showErrorToast} from 'components/Toast'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { theme } from '@utils/theme'
 import Loader from 'components/Loader'
-import {setCarts} from 'store/actions/carts'
+import { showErrorToast } from 'components/Toast'
+import React, { useState } from 'react'
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native'
+import { RFValue as fs } from 'react-native-responsive-fontsize'
+import { useDispatch } from 'react-redux'
+import { Order, order, OrderPay, payOrder } from 'services/order'
+import { setCarts } from 'store/actions/carts'
+import { convertToRupiah } from 'utils/convertRupiah'
 import FakeCurrencyInput from './fake-currency-input'
 
-const {width} = Dimensions.get('window')
+const { width } = Dimensions.get('window')
 
 export default function PaymentMethod() {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const route: any = useRoute()
-  const {carts, typeOrder, tax, noteDineIn, subTotalPlusTax, total, orderId} = route?.params?.item
+  const { carts, typeOrder, tax, noteDineIn, subTotalPlusTax, total, orderId } = route?.params?.item
   const [totalPay, setTotalPay] = useState('')
   const [isLoading, setLoading] = useState(false)
 
@@ -51,11 +51,11 @@ export default function PaymentMethod() {
     setLoading(true)
     try {
       const {
-        data: {data},
+        data: { data },
       }: any = orderId ? await payOrder(payParam) : await order(param)
-      navigation.navigate('PaymentSuccess', {item: data})
+      navigation.navigate('PaymentSuccess', { item: data })
       dispatch(setCarts([]))
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
     } finally {
       setLoading(false)

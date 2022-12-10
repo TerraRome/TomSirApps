@@ -1,33 +1,27 @@
-import React, {useEffect, useState, useCallback} from 'react'
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  Image,
-  ActivityIndicator,
-  RefreshControl,
-  TextInput,
-  Alert,
-} from 'react-native'
-import {useIsFocused} from '@react-navigation/native'
-import {useSelector, useDispatch} from 'react-redux'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import {theme} from '@utils/theme'
 import Text from '@components/Text'
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
-import {convertToRupiah} from 'utils/convertRupiah'
-import {showErrorToast} from 'components/Toast'
-import {getOrderList} from 'services/order'
-import {setOrders} from 'store/actions/order'
-import {formatDate} from '@utils/formatDate'
+import { useIsFocused } from '@react-navigation/native'
+import { formatDate } from '@utils/formatDate'
+import { theme } from '@utils/theme'
+import { showErrorToast } from 'components/Toast'
+import React, { useCallback, useEffect, useState } from 'react'
+import {
+  ActivityIndicator, Alert, FlatList,
+  Image, RefreshControl, StyleSheet, TextInput, TouchableOpacity, View
+} from 'react-native'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import { useDispatch, useSelector } from 'react-redux'
+import { getOrderList } from 'services/order'
+import { setOrders } from 'store/actions/order'
+import { convertToRupiah } from 'utils/convertRupiah'
 
 let searchDebounce: any = null
-const OrderList = ({navigation}: any) => {
+const OrderList = ({ navigation }: any) => {
   const dispatch = useDispatch()
   const isFocused = useIsFocused()
-  const {rows, page_size, current_page} = useSelector((state: any) => state.order)
+  const { rows, page_size, current_page } = useSelector((state: any) => state.order)
   const cartsState = useSelector((state: any) => state.carts.data)
+  const merchant = useSelector((state: any) => state.auth?.user?.merchant)
 
   const orderId = cartsState.find((e: any) => !!e.orderId)?.orderId
 
@@ -39,11 +33,14 @@ const OrderList = ({navigation}: any) => {
     sortBy: 'createdAt',
     order: 'ASC',
     status: 'hold',
+    merchant_id: merchant.id,
     search: undefined,
   })
 
   const getData = useCallback(
     async (params?: any) => {
+      console.log(merchant.id);
+
       setLoading(true)
       try {
         if (!queryParams?.search) {
@@ -53,10 +50,10 @@ const OrderList = ({navigation}: any) => {
           delete params.search
         }
         const {
-          data: {data},
-        } = await getOrderList({...queryParams, ...params})
+          data: { data },
+        } = await getOrderList({ ...queryParams, ...params })
         dispatch(setOrders(data))
-      } catch (error) {
+      } catch (error: any) {
         showErrorToast(error.message)
       } finally {
         setLoading(false)
@@ -71,19 +68,19 @@ const OrderList = ({navigation}: any) => {
     if (isLoading || !hasNextPage) {
       return
     }
-    getData({page: nextPage})
+    getData({ page: nextPage })
   }
 
   const refreshData = (param?: any) => {
-    getData({page: 1, ...param})
+    getData({ page: 1, ...param })
   }
 
   const handleSearch = (search: any) => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => {
-      refreshData({search})
+      refreshData({ search })
     }, 400)
-    setParams({...queryParams, search})
+    setParams({ ...queryParams, search })
   }
 
   useEffect(() => {
@@ -100,7 +97,7 @@ const OrderList = ({navigation}: any) => {
           {
             text: 'Simpan',
             onPress: () => {
-              navigation.navigate('CheckOut', {item: existingItem})
+              navigation.navigate('CheckOut', { item: existingItem })
             },
           },
           {
@@ -109,10 +106,10 @@ const OrderList = ({navigation}: any) => {
         ],
       )
     }
-    navigation.navigate('CheckOut', {item})
+    navigation.navigate('CheckOut', { item })
   }
 
-  const renderItem = ({item}: {item: any}) => {
+  const renderItem = ({ item }: { item: any }) => {
     const createdAt = item?.createdAt && formatDate(item?.createdAt)
     return (
       <TouchableOpacity style={styles.listItem} activeOpacity={0.5} onPress={onPressItem(item)}>
@@ -183,7 +180,7 @@ const EmptyList = () => (
   </View>
 )
 
-const Footer = ({loading}: {loading: boolean}) => (
+const Footer = ({ loading }: { loading: boolean }) => (
   <View style={styles.footer}>
     <ActivityIndicator size="large" color={theme.colors.primary} animating={loading} />
   </View>
@@ -217,8 +214,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
-  emptyImage: {width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain'},
-  center: {alignSelf: 'center'},
+  emptyImage: { width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain' },
+  center: { alignSelf: 'center' },
   searchBar: {
     borderColor: theme.colors.defaultBorderColor,
     backgroundColor: theme.colors.white,

@@ -1,51 +1,44 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  RefreshControl,
-  ActivityIndicator,
-  TextInput,
-  View,
-  Image,
+  ActivityIndicator, FlatList, Image, RefreshControl, StyleSheet, TextInput, TouchableOpacity, View
 } from 'react-native'
 
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
-import Feather from 'react-native-vector-icons/Feather'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { convertToRupiah } from '@utils/convertRupiah'
+import { theme } from '@utils/theme'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Entypo from 'react-native-vector-icons/Entypo'
-import {useSelector, useDispatch} from 'react-redux'
-import {theme} from '@utils/theme'
-import {convertToRupiah} from '@utils/convertRupiah'
+import Feather from 'react-native-vector-icons/Feather'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import { useDispatch, useSelector } from 'react-redux'
 
-import WrapFooterButton from '@components/WrapFooterButton'
 import Button from '@components/Button'
 import Modalize from '@components/Modalize'
 import Text from '@components/Text'
-import {getProducts} from '@services/products'
-import {getCategory} from '@store/actions/category'
-import {setProducts} from '@store/actions/products'
-import {showErrorToast} from '@components/Toast'
-import {getMerchantById} from '@store/actions/merchant'
-import Card from './product-card'
-import {useNavigation} from '@react-navigation/native'
-import {SafeAreaView} from 'react-native-safe-area-context'
+import { showErrorToast } from '@components/Toast'
+import WrapFooterButton from '@components/WrapFooterButton'
+import { useNavigation } from '@react-navigation/native'
+import { getProducts } from '@services/products'
+import { getCategory } from '@store/actions/category'
+import { getMerchantById } from '@store/actions/merchant'
+import { setProducts } from '@store/actions/products'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import calculateCart from 'utils/calculateCart'
+import Card from './product-card'
 
 let searchDebounce: any = null
 export default function Home() {
   const dispatch = useDispatch()
   const navigation = useNavigation()
   const modalFilterRef: any = useRef()
-  const {user} = useSelector((state: any) => state.auth)
+  const { user } = useSelector((state: any) => state.auth)
   const carts = useSelector((state: any) => state.carts.data)
   const order = useSelector((state: any) => state.order.rows)
   const category = useSelector((state: any) => state.category.rows)
-  const {rows, page_size, current_page} = useSelector((state: any) => state.products)
+  const { rows, page_size, current_page } = useSelector((state: any) => state.products)
 
-  const LIST_CATEGORY = [{id: undefined, name: 'Semua Produk', icon: '🏳️'}, ...category]
+  const LIST_CATEGORY = [{ id: undefined, name: 'Semua Produk', icon: '🏳️' }, ...category]
 
   const [isLoading, setLoading] = useState(false)
 
@@ -78,10 +71,10 @@ export default function Home() {
           delete queryParams.search
         }
         const {
-          data: {data},
-        } = await getProducts({...queryParams, ...params})
+          data: { data },
+        } = await getProducts({ ...queryParams, ...params })
         dispatch(setProducts(data))
-      } catch (error) {
+      } catch (error: any) {
         showErrorToast(error.message)
       } finally {
         setLoading(false)
@@ -96,19 +89,19 @@ export default function Home() {
     if (isLoading || !hasNextPage) {
       return
     }
-    getData({page: nextPage})
+    getData({ page: nextPage })
   }
 
   const refreshData = (param?: any) => {
-    getData({page: 1, ...param})
+    getData({ page: 1, ...param })
   }
 
   const handleSearch = (search: any) => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => {
-      refreshData({search})
+      refreshData({ search })
     }, 400)
-    setParams({...queryParams, search})
+    setParams({ ...queryParams, search })
   }
 
   useEffect(() => {
@@ -120,7 +113,7 @@ export default function Home() {
   return (
     <SafeAreaView style={[styles.container]}>
       <View style={styles.header}>
-        <View style={[styles.header, {justifyContent: 'flex-start'}]}>
+        <View style={[styles.header, { justifyContent: 'flex-start' }]}>
           <TouchableOpacity
             style={styles.headerItem}
             onPress={() => {
@@ -129,7 +122,7 @@ export default function Home() {
             }}>
             <Feather name="menu" size={20} />
           </TouchableOpacity>
-          <Text type="semibold" style={{fontSize: 18}}>
+          <Text type="semibold" style={{ fontSize: 18 }}>
             Katalog
           </Text>
         </View>
@@ -141,7 +134,7 @@ export default function Home() {
           <FontAwesome5 name="concierge-bell" size={20} color={theme.colors.blackSemiTransparent} />
           {order?.length > 0 && (
             <View style={styles.badgeIcon}>
-              <Text color="white" style={{fontSize: 9}} type="semibold">
+              <Text color="white" style={{ fontSize: 9 }} type="semibold">
                 {order?.length > 9 ? '9+' : order?.length}
               </Text>
             </View>
@@ -149,7 +142,7 @@ export default function Home() {
         </TouchableOpacity>
       </View>
       {isSearching ? (
-        <View style={{flexDirection: 'row', marginHorizontal: 10}}>
+        <View style={{ flexDirection: 'row', marginHorizontal: 10 }}>
           <TextInput
             value={queryParams.search}
             placeholder="Cari nama produk..."
@@ -166,7 +159,7 @@ export default function Home() {
           </TouchableOpacity>
         </View>
       ) : (
-        <View style={{flexDirection: 'row', paddingHorizontal: 10}}>
+        <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
           <TouchableOpacity
             onPress={() => modalFilterRef?.current?.open()}
             activeOpacity={0.5}
@@ -179,7 +172,7 @@ export default function Home() {
             onPress={() => setIsSearching(true)}
             style={[styles.filterButton, styles.searchButton]}>
             <FontAwesome name="search" size={14} />
-            <Text type="semibold" style={{marginLeft: 10}}>
+            <Text type="semibold" style={{ marginLeft: 10 }}>
               Cari
             </Text>
           </TouchableOpacity>
@@ -188,7 +181,7 @@ export default function Home() {
       <FlatList
         data={rows}
         numColumns={3}
-        style={{marginTop: 16}}
+        style={{ marginTop: 16 }}
         keyExtractor={item => item.id}
         onEndReached={getNextPage}
         onEndReachedThreshold={1}
@@ -218,15 +211,15 @@ export default function Home() {
       <Modalize ref={modalFilterRef}>
         <FlatList
           data={LIST_CATEGORY}
-          style={{padding: 16}}
+          style={{ padding: 16 }}
           keyExtractor={item => item.name + item.id}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <TouchableOpacity
               key={item.name + item.id}
               style={styles.filterItem}
               onPress={async () => {
-                await setParams({...queryParams, category_id: item.id})
-                refreshData({category_id: item.id})
+                await setParams({ ...queryParams, category_id: item.id })
+                refreshData({ category_id: item.id })
                 modalFilterRef?.current?.close()
               }}>
               <Text type="semibold">{item.name}</Text>
@@ -247,7 +240,7 @@ const EmptyList = () => (
   </View>
 )
 
-const Footer = ({loading}: {loading: boolean}) => (
+const Footer = ({ loading }: { loading: boolean }) => (
   <View style={styles.footer}>
     <ActivityIndicator size="large" color={theme.colors.primary} animating={loading} />
   </View>
@@ -260,14 +253,14 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flex: 1,
   },
-  center: {alignSelf: 'center'},
+  center: { alignSelf: 'center' },
   footer: {
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
-  emptyImage: {width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain'},
+  emptyImage: { width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain' },
   checkoutButton: {
     justifyContent: 'space-between',
     flexDirection: 'row',
@@ -311,8 +304,8 @@ const styles = StyleSheet.create({
     right: 10,
     top: 8,
   },
-  header: {flexDirection: 'row', alignItems: 'center', height: 50, justifyContent: 'space-between'},
-  headerItem: {paddingHorizontal: 22, paddingVertical: 10},
-  badgeIcon: {position: 'absolute', backgroundColor: 'red', borderRadius: 50, paddingHorizontal: 5, right: 0},
-  wrapRightHeader: {flexDirection: 'row', marginRight: 18, padding: 3, paddingHorizontal: 6},
+  header: { flexDirection: 'row', alignItems: 'center', height: 50, justifyContent: 'space-between' },
+  headerItem: { paddingHorizontal: 22, paddingVertical: 10 },
+  badgeIcon: { position: 'absolute', backgroundColor: 'red', borderRadius: 50, paddingHorizontal: 5, right: 0 },
+  wrapRightHeader: { flexDirection: 'row', marginRight: 18, padding: 3, paddingHorizontal: 6 },
 })
