@@ -1,6 +1,6 @@
+import Axios from '@utils/Axios'
 import {AxiosResponse} from 'axios'
 import qs from 'query-string'
-import Axios from '@utils/Axios'
 
 export interface Product {
   id: string
@@ -22,6 +22,7 @@ export interface OrderPay {
 export interface Order extends OrderPay {
   type_order: string
   note_order: string
+  whatsapp: string
   products: Product[]
   status: 'hold' | 'paid' | 'refund' | 'confirm'
 }

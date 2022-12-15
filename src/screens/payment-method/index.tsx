@@ -1,17 +1,17 @@
-import React, { useState } from 'react'
-import { StyleSheet, View, ScrollView, Dimensions, Alert } from 'react-native'
-import Text from '@components/Text'
 import Button from '@components/Button'
+import Text from '@components/Text'
 import WrapFooterButton from '@components/WrapFooterButton'
-import { useDispatch } from 'react-redux'
-import { theme } from '@utils/theme'
-import { RFValue as fs } from 'react-native-responsive-fontsize'
-import { convertToRupiah } from 'utils/convertRupiah'
 import { useNavigation, useRoute } from '@react-navigation/native'
-import { IResOrder, Order, order, OrderPay, payOrder } from 'services/order'
-import { showErrorToast } from 'components/Toast'
+import { theme } from '@utils/theme'
 import Loader from 'components/Loader'
+import { showErrorToast } from 'components/Toast'
+import React, { useState } from 'react'
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native'
+import { RFValue as fs } from 'react-native-responsive-fontsize'
+import { useDispatch } from 'react-redux'
+import { Order, order, OrderPay, payOrder } from 'services/order'
 import { setCarts } from 'store/actions/carts'
+import { convertToRupiah } from 'utils/convertRupiah'
 import FakeCurrencyInput from './fake-currency-input'
 
 const { width } = Dimensions.get('window')
@@ -20,12 +20,14 @@ export default function PaymentMethod() {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const route: any = useRoute()
-  const { carts, typeOrder, tax, noteDineIn, subTotalPlusTax, total, orderId } = route?.params?.item
+  const { carts, typeOrder, tax, noteDineIn, subTotalPlusTax, total, orderId, phone_number } = route?.params?.item
   const [totalPay, setTotalPay] = useState('')
   const [isLoading, setLoading] = useState(false)
   const [resMidtrans, setResMidtrans] = useState('')
 
   const handleSubmit = async (total_pay: string) => {
+    console.log(route?.params?.item);
+
     const payParam: OrderPay = {
       id: orderId,
       tax_order_percentage: parseFloat(tax || '0'),
@@ -38,6 +40,7 @@ export default function PaymentMethod() {
     const param: Order = {
       type_order: typeOrder,
       note_order: noteDineIn,
+      whatsapp: phone_number,
       products: carts.map((e: any) => ({
         id: e.id,
         qty: e.qty,
@@ -57,7 +60,7 @@ export default function PaymentMethod() {
       }: any = orderId ? await payOrder(payParam) : await order(param)
       navigation.navigate('PaymentSuccess', { item: data })
       dispatch(setCarts([]))
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
     } finally {
       setLoading(false)
@@ -87,7 +90,7 @@ export default function PaymentMethod() {
           }}
         />
         <View>
-          <Text>{}</Text>
+          <Text>{ }</Text>
         </View>
       </ScrollView>
       <WrapFooterButton>

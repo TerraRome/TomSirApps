@@ -30,7 +30,6 @@ import Modalize from '@components/Modalize'
 import { BluetoothManager } from 'react-native-bluetooth-escpos-printer'
 import { setPrinter } from 'store/actions/apps'
 import { fetchBase64 } from 'utils/fetch-blob'
-import { whatsappBill } from 'utils/whatsapp-bill'
 
 const PAYMENT_TYPE = [
   { label: 'Debit', icon: 'money-check', id: 1 },
@@ -263,13 +262,6 @@ export default function CheckOut() {
           <View style={{ flexDirection: 'row' }}>
             <TouchableOpacity
               onPress={() => {
-                whatsappBill(item)
-              }}
-              style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
-              <AntDesign name="sharealt" size={18} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
                 modalSelectTypePrint?.current?.open()
               }}
               style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
@@ -326,7 +318,7 @@ export default function CheckOut() {
             />
             <TextInput
               isNumber={true}
-              style={{ height: 45, width: "40%" }}
+              style={{ height: 45, width: "45%", fontSize: 10 }}
               placeholder="Nomor Whatsapp"
               value={phone_number}
               onChangeText={val => setPhone_number(val)}
@@ -486,6 +478,7 @@ export default function CheckOut() {
                   subTotalPlusTax,
                   total,
                   orderId,
+                  phone_number
                 },
               })
             }}>

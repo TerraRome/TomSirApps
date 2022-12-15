@@ -5,10 +5,9 @@ import { theme } from '@utils/theme'
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import { useDispatch, useSelector } from 'react-redux'
 
-import Button from '@components/Button'
 import Loader from '@components/Loader'
 import Text from '@components/Text'
-import WrapFooterButton from '@components/WrapFooterButton'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 //@ts-ignore
 import { showErrorToast } from '@components/Toast'
 import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native'
@@ -23,6 +22,7 @@ import { BluetoothManager } from 'react-native-bluetooth-escpos-printer'
 import { Modalize } from 'react-native-modalize'
 import { setPrinter } from 'store/actions/apps'
 import { fetchBase64 } from 'utils/fetch-blob'
+import { whatsappBill } from 'utils/whatsapp-bill'
 
 export default function DetailHistory() {
   const navigation = useNavigation()
@@ -104,6 +104,25 @@ export default function DetailHistory() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: item.code,
+      headerRight: () => (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() => {
+              whatsappBill(item)
+            }}
+            style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
+            <AntDesign name="sharealt" size={18} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => print(printer)}
+            style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
+            <AntDesign name="printer" size={18} />
+            <Text type="semibold" size={8} style={{ marginLeft: 4 }}>
+              Cetak
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ),
     })
   }, [navigation])
 
@@ -219,13 +238,13 @@ export default function DetailHistory() {
           </View>
         </View>
       </ScrollView>
-      <WrapFooterButton>
+      {/* <WrapFooterButton>
         <Button mode="outlined" onPress={() => print(printer)}>
           <Text type="bold" color={theme.colors.primary}>
             CETAK STRUK
           </Text>
         </Button>
-      </WrapFooterButton>
+      </WrapFooterButton> */}
       <Modalize adjustToContentHeight rootStyle={{ elevation: 99 }} ref={modalSelectPrinter}>
         <View style={{ padding: 16 }}>
           <Text type="semibold" size={10}>

@@ -1,24 +1,24 @@
-import React, {useEffect, useState, useRef} from 'react'
-import {Image, StyleSheet, View, ScrollView, TouchableOpacity, FlatList} from 'react-native'
-import {showErrorToast} from 'components/Toast'
-import Loader from '@components/Loader'
 import Button from '@components/Button'
 import Text from '@components/Text'
-import {theme} from '@utils/theme'
-import {convertToRupiah} from 'utils/convertRupiah'
-import {useNavigation, useRoute} from '@react-navigation/native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
-import {useBackButton} from 'hooks'
-import {printBill} from '@utils/print-bill'
-import {printCheff} from '@utils/print-cheff'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { printBill } from '@utils/print-bill'
+import { printCheff } from '@utils/print-cheff'
+import { theme } from '@utils/theme'
+import { showErrorToast } from 'components/Toast'
+import { useBackButton } from 'hooks'
+import React, { useEffect, useRef, useState } from 'react'
+import { FlatList, Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { convertToRupiah } from 'utils/convertRupiah'
 
 //@ts-ignore
-import {BluetoothManager} from 'react-native-bluetooth-escpos-printer'
-import {Modalize} from 'react-native-modalize'
-import {useDispatch, useSelector} from 'react-redux'
-import {setPrinter} from 'store/actions/apps'
-import {fetchBase64} from 'utils/fetch-blob'
+import { BluetoothManager } from 'react-native-bluetooth-escpos-printer'
+import { Modalize } from 'react-native-modalize'
+import { useDispatch, useSelector } from 'react-redux'
+import { setPrinter } from 'store/actions/apps'
+import { fetchBase64 } from 'utils/fetch-blob'
+import { whatsappBill } from 'utils/whatsapp-bill'
 
 export default function PaymenSuccess() {
   const navigation = useNavigation()
@@ -54,9 +54,9 @@ export default function PaymenSuccess() {
       await BluetoothManager.connect(prnter.address)
       if (type === 'bill') {
         item.logo = merchant?.image ? await fetchBase64(merchant.image) : undefined
-        await printBill({...item, merchant})
+        await printBill({ ...item, merchant })
       } else {
-        await printCheff({...item, merchant})
+        await printCheff({ ...item, merchant })
       }
     } catch (error) {
       dispatch(setPrinter(null))
@@ -77,11 +77,11 @@ export default function PaymenSuccess() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={[{marginTop: insets.top + 32}]}>
+      <ScrollView contentContainerStyle={[{ marginTop: insets.top + 32 }]}>
         <View style={styles.contentContainer}>
           <Image
             source={require('@assets/images/success.png')}
-            style={{width: wp(32), height: wp(32), marginBottom: 32}}
+            style={{ width: wp(32), height: wp(32), marginBottom: 32 }}
           />
           <Text type="bold" size={13}>
             Transaksi Sukses!
@@ -94,9 +94,18 @@ export default function PaymenSuccess() {
           <Text>Metode Pembayaran: {item?.payment_type}</Text>
         </View>
       </ScrollView>
-      <View style={{flexDirection: 'row'}}>
+      <Button
+        style={{ marginLeft: 8 }}
+        loading={isLoading}
+        onPress={() => whatsappBill(item)}
+        mode="outlined">
+        <Text type="semibold" size={7}>
+          {isLoading ? 'MENCETAK...' : 'CETAK WHATSAPP'}
+        </Text>
+      </Button>
+      <View style={{ flexDirection: 'row' }}>
         <Button
-          style={{flex: 1}}
+          style={{ flex: 1 }}
           loading={isLoading}
           onPress={() => {
             setType('bill')
@@ -108,7 +117,7 @@ export default function PaymenSuccess() {
           </Text>
         </Button>
         <Button
-          style={{flex: 1, marginLeft: 8}}
+          style={{ flex: 1, marginLeft: 8 }}
           loading={isLoading}
           onPress={() => {
             setType('bill')
@@ -128,15 +137,15 @@ export default function PaymenSuccess() {
           BUAT PESANAN BARU
         </Text>
       </Button>
-      <Modalize ref={modalFilterRef} adjustToContentHeight rootStyle={{elevation: 99}}>
-        <View style={{padding: 16}}>
+      <Modalize ref={modalFilterRef} adjustToContentHeight rootStyle={{ elevation: 99 }}>
+        <View style={{ padding: 16 }}>
           <Text type="semibold" size={10}>
             Pilih Printer
           </Text>
           <FlatList
             data={listPrinter}
             keyExtractor={(item: any) => item.name + item.id}
-            renderItem={({item}: any) => (
+            renderItem={({ item }: any) => (
               <TouchableOpacity
                 key={item.address}
                 activeOpacity={0.5}

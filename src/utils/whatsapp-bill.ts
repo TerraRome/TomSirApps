@@ -1,52 +1,88 @@
+import moment from 'moment'
 import {Linking} from 'react-native'
+import calculateCart from './calculateCart'
 
 export const whatsappBill = (item: any) => {
+  let phoneWithCountryCode = `+62` + item?.whatsapp
+  let message = messageBill(item)
+
+  console.log(item)
+
+  Linking.openURL(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
+}
+
+const messageBill = (item: any) => {
+  let carts =
+    item?.transaction_product?.map((e: any) => ({
+      cartId: e?.id,
+      id: e.product_id,
+      qty: e.qty,
+      note: e.note,
+      transaction_product_id: e?.id,
+      addons: e?.addons || [],
+      name: e.product.name,
+      description: e.product.description,
+      addon_category: e.product.addon_category,
+      ingredient: e.product.ingredient,
+      product: e.product,
+      image: e.product.image,
+      price: e.product.price,
+      disc: e.product.disc,
+      is_disc_percentage: e.product.is_disc_percentage,
+    })) || []
+
+  const calculate = calculateCart(carts)
+  const subTotalMinusDiscount = calculate.subtotal - calculate.discount
+  const subTotalPlusTax = subTotalMinusDiscount + item.total_tax
+  const total = subTotalMinusDiscount + subTotalPlusTax
+
+  let productDetail = () => {
+    const message = carts.map((e: any) => {
+      const totalPriceAddons = e.addons.reduce(
+        (acc: number, curr: any) => acc + parseFloat(curr.price),
+        0,
+      )
+      const totalRealPriceItem = parseFloat(e.price + totalPriceAddons) * e?.qty
+      const nominalDiscount = e?.is_disc_percentage
+        ? (parseFloat(e?.price) * e?.disc) / 100
+        : parseFloat(e?.disc)
+      const discountPrice = totalRealPriceItem - nominalDiscount * e?.qty
+      const message = `✅ ${e?.qty} ${e?.name} @ Rp${e?.product?.price}
+Total: Rp${discountPrice}
+`
+
+      return message
+    })
+
+    return message
+  }
+
   let msg = `FAKTUR ELEKTRONIK
 Dr.Clean laundry
 Raya Darmo Baru Barat no 54
-6281336832016
+${item?.whatsapp}
 
 Pelanggan Yth,
-pak rintis
+Pak ${item?.note} 
 
 Nomor Nota:
-DCLN221128131416442
+${item?.code}
 
-Terima:
-28/11/2022 13:14
-Selesai:
-29/11/2022 13:14
+Tanggal:
+${moment(item?.createdAt).format('DD MMM YYYY HH:mm')}
 
 =================
 Detail pesanan:
-✅ 1 Paket Cuci Kering Setrika/ 3kg @ Rp25.000,-
-Total: Rp25.000,-
-Ket: 18pcs 2.5kg
+${productDetail()}
 =================
 Detail biaya :
-Total tagihan : Rp25.000,-
-Grand total : Rp25.000,-
-💵 DEBIT Rp25.000,-
+Total tagihan : Rp${subTotalMinusDiscount},-
+Pajak(${item?.tax_percentage}%) : Rp${item?.total_tax}
+Grand total : Rp${item?.total_price},-
+💵 ${item?.payment_type}  : Rp${item?.total_pay},-
+${item?.payment_return > 0 ? 'Kembalian : Rp' + item?.payment_return : ''}
 
-Status: Lunas
-=================
-Syarat & ketentuan:
-PERHATIAN :
-1. Pengambilan barang harap disertai nota
-2. Barang yang tidak diambil selama 1 bulan, hilang / rusak tidak diganti
-3. Barang hilang/rusak karena proses pengerjaan diganti maksimal 3x biaya.
-4. Klaim luntur tidak dipisah diluar tanggungan
-5. Hak klaim berlaku 2 jam setelah barang diambil
-6. Setiap konsumen dianggap setuju dengan isi perhitungan tersebut diatas
-=================================
+Status: Lunas`
 
-http://kertas.online/nota/n/DCLN221128131416442
-
-Terima kasih`
-
-  let phoneWithCountryCode = item?.whatsapp
-
-  Linking.openURL(
-    `https://wa.me/085156247366?text=I'm%20interested%20in%20your%20car%20for%20sale`,
-  )
+  return msg
 }
