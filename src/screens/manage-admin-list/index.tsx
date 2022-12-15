@@ -1,13 +1,13 @@
-import CustomButton from '@components/Button'
-import Text from '@components/Text'
+import React, { useCallback, useEffect, useState } from 'react'
+import { View, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, RefreshControl, TextInput } from 'react-native'
 import { useIsFocused } from '@react-navigation/native'
+import { theme } from '@utils/theme'
+import Text from '@components/Text'
+import CustomButton from '@components/Button'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import { useSelector, useDispatch } from 'react-redux'
 import { getUsers } from '@services/user'
 import { setUsers } from '@store/actions/user'
-import { theme } from '@utils/theme'
-import React, { useCallback, useEffect, useState } from 'react'
-import { FlatList, RefreshControl, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import { useDispatch, useSelector } from 'react-redux'
 
 let searchDebounce: any = null
 const ManageAdminList = ({ navigation }: any) => {
@@ -28,7 +28,7 @@ const ManageAdminList = ({ navigation }: any) => {
 
   useEffect(() => {
     refreshData()
-  }, [queryParams])
+  }, [queryParams, isFocused])
 
   const refreshData = (params?: any) => {
     getData({ page: 1, ...params })
@@ -45,7 +45,7 @@ const ManageAdminList = ({ navigation }: any) => {
           data: { data },
         } = await getUsers({ ...queryParams, ...params })
         dispatch(setUsers(data))
-      } catch (error: any) {
+      } catch (error) {
         // console.log(error.response)
       } finally {
         setIsLoading(false)

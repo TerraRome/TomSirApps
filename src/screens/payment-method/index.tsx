@@ -1,17 +1,17 @@
-import Button from '@components/Button'
-import Text from '@components/Text'
-import WrapFooterButton from '@components/WrapFooterButton'
-import { useNavigation, useRoute } from '@react-navigation/native'
-import { theme } from '@utils/theme'
-import Loader from 'components/Loader'
-import { showErrorToast } from 'components/Toast'
 import React, { useState } from 'react'
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native'
-import { RFValue as fs } from 'react-native-responsive-fontsize'
+import { StyleSheet, View, ScrollView, Dimensions, Alert } from 'react-native'
+import Text from '@components/Text'
+import Button from '@components/Button'
+import WrapFooterButton from '@components/WrapFooterButton'
 import { useDispatch } from 'react-redux'
-import { Order, order, OrderPay, payOrder } from 'services/order'
-import { setCarts } from 'store/actions/carts'
+import { theme } from '@utils/theme'
+import { RFValue as fs } from 'react-native-responsive-fontsize'
 import { convertToRupiah } from 'utils/convertRupiah'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { IResOrder, Order, order, OrderPay, payOrder } from 'services/order'
+import { showErrorToast } from 'components/Toast'
+import Loader from 'components/Loader'
+import { setCarts } from 'store/actions/carts'
 import FakeCurrencyInput from './fake-currency-input'
 
 const { width } = Dimensions.get('window')
@@ -23,6 +23,7 @@ export default function PaymentMethod() {
   const { carts, typeOrder, tax, noteDineIn, subTotalPlusTax, total, orderId } = route?.params?.item
   const [totalPay, setTotalPay] = useState('')
   const [isLoading, setLoading] = useState(false)
+  const [resMidtrans, setResMidtrans] = useState('')
 
   const handleSubmit = async (total_pay: string) => {
     const payParam: OrderPay = {
@@ -48,6 +49,7 @@ export default function PaymentMethod() {
       ...payParam,
       id: undefined,
     }
+    // console.log(param)
     setLoading(true)
     try {
       const {
@@ -55,7 +57,7 @@ export default function PaymentMethod() {
       }: any = orderId ? await payOrder(payParam) : await order(param)
       navigation.navigate('PaymentSuccess', { item: data })
       dispatch(setCarts([]))
-    } catch (error: any) {
+    } catch (error) {
       showErrorToast(error.message)
     } finally {
       setLoading(false)
@@ -84,6 +86,9 @@ export default function PaymentMethod() {
             setTotalPay(value)
           }}
         />
+        <View>
+          <Text>{}</Text>
+        </View>
       </ScrollView>
       <WrapFooterButton>
         <Button

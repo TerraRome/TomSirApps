@@ -1,22 +1,25 @@
-import React, {useState, useEffect, useRef} from 'react'
-import {View, SafeAreaView, StyleSheet, Image, TouchableOpacity, ScrollView, Alert} from 'react-native'
+import React, { useState, useEffect, useRef } from 'react'
+import { View, Switch, SafeAreaView, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from 'react-native'
 import FormData from 'form-data'
-import {launchImageLibrary} from 'react-native-image-picker'
+import { launchImageLibrary } from 'react-native-image-picker'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import {useNavigation} from '@react-navigation/native'
-import {addProduct, editProduct, deleteProduct} from '@services/products'
-import {setIngredientItem} from '@store/actions/ingredient'
+import { useNavigation } from '@react-navigation/native'
+import { addProduct, editProduct, deleteProduct } from '@services/products'
+import { addPriceProduct, getPriceProduct, editPriceProduct, deletePriceProduct } from '@services/price-product'
+import { setIngredientItem } from '@store/actions/ingredient'
 import CheckBox from '@react-native-community/checkbox'
-import {showErrorToast, showSuccessToast} from 'components/Toast'
-import {useSelector, useDispatch} from 'react-redux'
-import {getCategory} from 'store/actions/category'
-import {moneyFormat, convertToAngka} from '@utils/convertRupiah'
-import {theme} from '@utils/theme'
+import { showErrorToast, showSuccessToast } from 'components/Toast'
+import { useSelector, useDispatch } from 'react-redux'
+import { getCategory } from 'store/actions/category'
+import { getTypeOrder } from 'store/actions/typeorder'
+import { moneyFormat, convertToAngka } from '@utils/convertRupiah'
+import { theme } from '@utils/theme'
 import Text from '@components/Text'
 import Button from '@components/Button'
 import Modalize from '@components/Modalize'
 import TextInput from '@components/TextInput'
+import order from 'store/reducers/order'
 
 const options: any = {
   quality: 0.4,
@@ -24,21 +27,31 @@ const options: any = {
   maxHeight: 400,
 }
 
-const AddProduct = ({route}: any) => {
+const AddProduct = ({ route }: any) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const id = route?.params?.id || ''
   const addonCategory = route?.params?.addonCategory || []
   const isEdit = route?.params?.isEdit
+  const isPriceEdit = route?.params?.sell_type
+  const priceProduct = route?.params?.priceInfo
+  const priceInfo = isPriceEdit ? JSON.parse(priceProduct['price_info']) : ""
   let checked = route?.params?.checked || {}
 
   const modalFilterRef: any = useRef()
+  const [more, setMore] = useState(true)
   const [disabled, setDisabled] = useState(true)
   const category = useSelector((state: any) => state.category.rows)
-  const {dataIngredient} = useSelector((state: any) => state.ingredient)
+  const { dataIngredient } = useSelector((state: any) => state.ingredient)
+  const typeOrder = useSelector((state: any) => state.typeOrder.statusRows)
+  const [orderType, setOrder] = useState(typeOrder)
   const [product, setProduct] = useState<any>({
     name: route?.params?.name || '',
-    price: route?.params?.price || '',
+    sell_type: route?.params?.sell_type || false,
+    modal: route?.params?.modal || 0,
+    price: route?.params?.price || 0,
+    sku: route?.params?.sku || '',
+    barcode: route?.params?.barcode || '',
     description: route?.params?.description || '',
     image: '',
     imageUri: route?.params?.image || '',
@@ -51,7 +64,35 @@ const AddProduct = ({route}: any) => {
 
   useEffect(() => {
     dispatch(getCategory())
-  }, [])
+    dispatch(getTypeOrder())
+    if (isPriceEdit) {
+      changeOrderType();
+    }
+  }, [priceProduct])
+
+  const changeOrderType = () => {
+    let newArr = [...orderType];
+    for (var key1 of Object.keys(typeOrder)) {
+      for (var key2 of Object.keys(priceInfo)) {
+        if (typeOrder[key1].name == priceInfo[key2].name && priceInfo[key2].note != null) {
+          newArr[key1] = {
+            name: orderType[key1].name,
+            note: convertToAngka(priceInfo[key2].note)
+          };
+        }
+      }
+    }
+    setOrder(newArr);
+  }
+
+  const handleChange = (index: any) => (e: any) => {
+    let newArr = [...orderType]; // copying the old datas array
+    newArr[index] = {
+      name: orderType[index].name,
+      note: convertToAngka(e)
+    };
+    setOrder(newArr);
+  }
 
   useEffect(() => {
     onIsFilled()
@@ -91,23 +132,29 @@ const AddProduct = ({route}: any) => {
 
   const onPressAddon = () => {
     // eslint-disable-next-line no-shadow
-    const setChecked = Object.assign({}, ...addonCategory.map(({id}: any) => ({[id]: true})))
+    const setChecked = Object.assign({}, ...addonCategory.map(({ id }: any) => ({ [id]: true })))
     checked = setChecked
-    return navigation.navigate('SelectAddon', {checked, addonCategory})
+    return navigation.navigate('SelectAddon', { checked, addonCategory })
   }
 
   const onCreateProduct = async () => {
-    const {name, description, stock, price, category_id, image, is_disc_percentage, disc} = product
+    const { name, description, sell_type, stock, modal, price, sku, barcode, category_id, image, is_disc_percentage, disc } = product
 
     const addonCategories = addonCategory.map((item: any) => item.id)
-    // eslint-disable-next-line no-shadow
-    const ingredients = dataIngredient.map(({id, qty}: any) => ({id, qty}))
+    const ingredients = dataIngredient.map(({ id, qty }: any) => ({ id, qty }))
+    const queryParams = {
+      price_info: JSON.stringify(orderType)
+    }
 
     const formData: any = new FormData()
     formData.append('name', name)
     formData.append('description', description)
+    formData.append('sell_type', sell_type)
     formData.append('stock', Number(stock))
+    formData.append('modal', convertToAngka(modal))
     formData.append('price', convertToAngka(price))
+    formData.append('sku', sku)
+    formData.append('barcode', barcode)
     formData.append('category_id', category_id)
     formData.append('addon_categories', JSON.stringify(addonCategories))
     formData.append('ingredients', JSON.stringify(ingredients))
@@ -125,6 +172,25 @@ const AddProduct = ({route}: any) => {
       formData.append('disc', Number(disc))
     }
 
+    if (isPriceEdit) {
+      try {
+        if (product.sell_type == false) {
+          await deletePriceProduct(priceProduct['id'])
+        } else {
+          await editPriceProduct(priceProduct['id'], queryParams)
+        }
+      } catch (error) {
+        showErrorToast(error.message)
+      }
+    } else {
+      try {
+        const { data: { data } } = await addPriceProduct(queryParams)
+        formData.append('price_product_id', data.id)
+      } catch (error) {
+        showErrorToast(error.message)
+      }
+    }
+
     if (isEdit) {
       try {
         const data = await editProduct(id, formData)
@@ -139,7 +205,7 @@ const AddProduct = ({route}: any) => {
       try {
         const data = await addProduct(formData)
         if (data.status === 200) {
-          showSuccessToast('Data produk berhasil diubah')
+          // showSuccessToast('Data produk berhasil ditambah')
           navigation.navigate('ManageProductList')
         }
       } catch (error) {
@@ -165,7 +231,13 @@ const AddProduct = ({route}: any) => {
                 showSuccessToast('Data produk berhasil dihapus')
                 navigation.navigate('ManageProductList')
               }
-            } catch ({message}) {
+              if (isPriceEdit) {
+                const data = await deletePriceProduct(priceProduct['id'])
+                if (data.status === 200) {
+                  showSuccessToast('Data Harga berhasil dihapus')
+                }
+              }
+            } catch ({ message }) {
               showErrorToast(message)
             }
           },
@@ -178,13 +250,12 @@ const AddProduct = ({route}: any) => {
   }
 
   const onIsFilled = () => {
-    const {name, description, stock, price, category_id} = product
+    const { name, stock, price, category_id } = product
 
     let isFilled = true
 
     const formsData: any = {
       name,
-      description,
       stock,
       price,
       category_id,
@@ -208,130 +279,188 @@ const AddProduct = ({route}: any) => {
             onChangeText={onChange('name')}
             type="default"
           />
-          <Text style={styles.inputTitle}>Harga Jual</Text>
-          <TextInput
-            value={moneyFormat(product.price)}
-            placeholder="Masukan harga produk"
-            onChangeText={onChange('price')}
-            type="default"
-            isNumber
-          />
-          <Text style={styles.inputTitle}>Foto Produk</Text>
-          <View style={styles.photoWrapper}>
-            {product.imageUri ? (
-              <Image source={{uri: product.imageUri}} style={styles.photo} />
-            ) : (
-              <View style={styles.photo}>
-                <Ionicons name="ios-image-outline" size={25} color={theme.colors.grey} />
-              </View>
-            )}
-            {product.imageUri ? (
-              <TouchableOpacity
-                onPress={() => {
-                  setProduct({
-                    ...product,
-                    image: '',
-                    imageUri: '',
-                  })
-                }}>
-                <AntDesign name="close" size={20} style={styles.closeIcon} color={theme.colors.blackSemiTransparent} />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={handleUploadPhoto} style={styles.buttonPhoto} activeOpacity={0.6}>
-                <Text style={styles.photoText}>PILIH FOTO</Text>
-              </TouchableOpacity>
-            )}
+          <Text style={styles.inputTitle}>Harge Jual per Tipe Pesanan</Text>
+          <View style={styles.switchView}>
+            <Text style={styles.inputTitle2}>*Terapkan harga berbeda untuk setiap tipe pesanan</Text>
+            <Switch
+              style={{ transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }] }}
+              trackColor={{ false: "#767577", true: theme.colors.primary }}
+              thumbColor={product.sell_type ? "#f4f3f4" : "#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={onChange('sell_type')}
+              value={product.sell_type}
+            />
           </View>
-          <Text style={styles.inputTitle}>Deskripsi Produk</Text>
-          <TextInput
-            value={product.description}
-            placeholder="Masukan deskripsi produk"
-            onChangeText={onChange('description')}
-            type="default"
-            multiline
-            numberOfLines={5}
-            style={styles.inputDesc}
-            textAlignVertical="top"
-          />
-          <Text style={styles.inputTitle}>Kategori Produk</Text>
-          <TouchableOpacity onPress={() => modalFilterRef?.current?.open()} style={styles.category}>
-            {product.categoryName ? (
-              <Text>{product.categoryName}</Text>
-            ) : (
-              <Text style={styles.placeholder}>Pilih kategori produk</Text>
-            )}
-            <AntDesign name="right" size={20} color={theme.colors.blackSemiTransparent} />
-          </TouchableOpacity>
-          <Text style={styles.inputTitle}>Stok</Text>
-          <TextInput
-            value={product.stock}
-            placeholder="Masukan stok produk"
-            onChangeText={onChange('stock')}
-            type="default"
-            isNumber
-          />
-          <Text style={styles.inputTitle}>Tambah Varian</Text>
-          <TouchableOpacity onPress={onPressAddon} style={styles.addon}>
-            <View style={styles.row}>
-              {addonCategory.length ? (
-                addonCategory?.map((item: any) => (
-                  <View style={styles.chip}>
-                    <Text>{item.name}</Text>
-                  </View>
-                ))
-              ) : (
-                <Text style={styles.placeholder}>Pilih varian produk</Text>
-              )}
+          {product.sell_type ? (
+            <View style={{ backgroundColor: '#a9a9a9', padding: 10 }}>
+              {orderType.map((e: any, i: any) => (
+                <View>
+                  <Text style={styles.inputTitle}>{e.name}</Text>
+                  <TextInput
+                    value={moneyFormat(e.note)}
+                    placeholder="Masukkan Harga"
+                    onChangeText={handleChange(i)}
+                    type="default"
+                    isNumber
+                  />
+                </View>
+              ))}
             </View>
-            <AntDesign name="right" size={20} color={theme.colors.blackSemiTransparent} />
-          </TouchableOpacity>
-          <Text style={styles.inputTitle}>Tambah Bahan</Text>
-          <TouchableOpacity onPress={navigateToIngredient} style={styles.addon}>
-            <View style={styles.row}>
-              {dataIngredient.length ? (
-                dataIngredient?.map((item: any) => (
-                  <View style={styles.chip}>
-                    <Text>{item.name}</Text>
-                  </View>
-                ))
+          ) : null}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={styles.Title1}>Data Tambahan</Text>
+            <TouchableOpacity onPress={() => setMore(!more)}>
+              {more ? <AntDesign name={'right'} size={25} /> : <AntDesign name={'down'} size={25} />}
+            </TouchableOpacity>
+          </View>
+          {more ? null : <>
+            <Text style={styles.inputTitle}>Harga Modal</Text>
+            <TextInput
+              value={moneyFormat(product.modal)}
+              placeholder="Masukan modal produk"
+              onChangeText={onChange('modal')}
+              type="default"
+              isNumber
+            />
+            <Text style={styles.inputTitle}>Harga Jual</Text>
+            <TextInput
+              value={moneyFormat(product.price)}
+              placeholder="Masukan harga produk"
+              onChangeText={onChange('price')}
+              type="default"
+              isNumber
+            />
+            <Text style={styles.inputTitle}>SKU</Text>
+            <TextInput
+              value={product.sku}
+              placeholder="Masukan SKU produk"
+              onChangeText={onChange('sku')}
+              type="default"
+            />
+            <Text style={styles.inputTitle}>Barcode</Text>
+            <TextInput
+              value={product.barcode}
+              placeholder="Masukan Keterangan barcode"
+              onChangeText={onChange('barcode')}
+              type="default"
+            />
+            <Text style={styles.inputTitle}>Foto Produk</Text>
+            <View style={styles.photoWrapper}>
+              {product.imageUri ? (
+                <Image source={{ uri: product.imageUri }} style={styles.photo} />
               ) : (
-                <Text style={styles.placeholder}>Pilih bahan baku</Text>
+                <View style={styles.photo}>
+                  <Ionicons name="ios-image-outline" size={25} color={theme.colors.grey} />
+                </View>
               )}
-            </View>
-            <AntDesign name="right" size={20} color={theme.colors.blackSemiTransparent} />
-          </TouchableOpacity>
-          {isEdit && (
-            <>
-              <View style={styles.checkboxContainer}>
-                <CheckBox
-                  disabled={false}
-                  tintColors={{true: theme.colors.primary}}
-                  onTintColor={theme.colors.grey2}
-                  onFillColor={theme.colors.grey2}
-                  onCheckColor={theme.colors.white}
-                  animationDuration={0.2}
-                  lineWidth={1.5}
-                  boxType={'square'}
-                  value={product.is_disc_percentage}
-                  onValueChange={(selected: boolean) => {
+              {product.imageUri ? (
+                <TouchableOpacity
+                  onPress={() => {
                     setProduct({
                       ...product,
-                      is_disc_percentage: selected,
+                      image: '',
+                      imageUri: '',
                     })
-                  }}
-                />
-                <Text style={styles.inputTitle}>Tambah Diskon (%)</Text>
+                  }}>
+                  <AntDesign name="close" size={20} style={styles.closeIcon} color={theme.colors.blackSemiTransparent} />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={handleUploadPhoto} style={styles.buttonPhoto} activeOpacity={0.6}>
+                  <Text style={styles.photoText}>PILIH FOTO</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <Text style={styles.inputTitle}>Deskripsi Produk</Text>
+            <TextInput
+              value={product.description}
+              placeholder="Masukan deskripsi produk"
+              onChangeText={onChange('description')}
+              type="default"
+              multiline
+              numberOfLines={5}
+              style={styles.inputDesc}
+              textAlignVertical="top"
+            />
+            <Text style={styles.inputTitle}>Kategori Produk</Text>
+            <TouchableOpacity onPress={() => modalFilterRef?.current?.open()} style={styles.category}>
+              {product.categoryName ? (
+                <Text>{product.categoryName}</Text>
+              ) : (
+                <Text style={styles.placeholder}>Pilih kategori produk</Text>
+              )}
+              <AntDesign name="right" size={20} color={theme.colors.blackSemiTransparent} />
+            </TouchableOpacity>
+            <Text style={styles.inputTitle}>Stok</Text>
+            <TextInput
+              value={product.stock}
+              placeholder="Masukan stok produk"
+              onChangeText={onChange('stock')}
+              type="default"
+              isNumber
+            />
+            <Text style={styles.inputTitle}>Tambah Varian</Text>
+            <TouchableOpacity onPress={onPressAddon} style={styles.addon}>
+              <View style={styles.row}>
+                {addonCategory.length ? (
+                  addonCategory?.map((item: any) => (
+                    <View style={styles.chip}>
+                      <Text>{item.name}</Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.placeholder}>Pilih varian produk</Text>
+                )}
               </View>
-              <TextInput
-                placeholder="Masukan besaran diskon"
-                onChangeText={onChange('disc')}
-                type="default"
-                isNumber
-                value={product.disc}
-                disabled={product.is_disc_percentage}
-              />
-            </>
-          )}
+              <AntDesign name="right" size={20} color={theme.colors.blackSemiTransparent} />
+            </TouchableOpacity>
+            <Text style={styles.inputTitle}>Tambah Bahan</Text>
+            <TouchableOpacity onPress={navigateToIngredient} style={styles.addon}>
+              <View style={styles.row}>
+                {dataIngredient.length ? (
+                  dataIngredient?.map((item: any) => (
+                    <View style={styles.chip}>
+                      <Text>{item.name}</Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.placeholder}>Pilih bahan baku</Text>
+                )}
+              </View>
+              <AntDesign name="right" size={20} color={theme.colors.blackSemiTransparent} />
+            </TouchableOpacity>
+            {isEdit && (
+              <>
+                <View style={styles.checkboxContainer}>
+                  <CheckBox
+                    disabled={false}
+                    tintColors={{ true: theme.colors.primary }}
+                    onTintColor={theme.colors.grey2}
+                    onFillColor={theme.colors.grey2}
+                    onCheckColor={theme.colors.white}
+                    animationDuration={0.2}
+                    lineWidth={1.5}
+                    boxType={'square'}
+                    value={product.is_disc_percentage}
+                    onValueChange={(selected: boolean) => {
+                      setProduct({
+                        ...product,
+                        is_disc_percentage: selected,
+                      })
+                    }}
+                  />
+                  <Text style={styles.inputTitle}>Tambah Diskon (%)</Text>
+                </View>
+                <TextInput
+                  placeholder="Masukan besaran diskon"
+                  onChangeText={onChange('disc')}
+                  type="default"
+                  isNumber
+                  value={product.disc}
+                  disabled={product.is_disc_percentage}
+                />
+              </>
+            )}
+          </>}
         </ScrollView>
       </View>
 
@@ -358,7 +487,7 @@ const AddProduct = ({route}: any) => {
               key={e.id}
               style={styles.modalContent}
               onPress={() => {
-                setProduct({...product, category_id: e.id, categoryName: e.name})
+                setProduct({ ...product, category_id: e.id, categoryName: e.name })
                 modalFilterRef?.current?.close()
               }}>
               <Text type="semibold">{e.name}</Text>
@@ -381,10 +510,22 @@ const styles = StyleSheet.create({
     margin: 16,
     flex: 1,
   },
+  Title1: {
+    fontSize: 18,
+    paddingLeft: 5,
+    paddingVertical: 15,
+    fontWeight: 'bold'
+  },
   inputTitle: {
     fontSize: 14,
     paddingLeft: 5,
   },
+  inputTitle2: {
+    color: 'grey',
+    fontSize: 12,
+    paddingLeft: 5,
+  },
+  switchView: { flex: 1, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, marginRight: 15 },
   photoWrapper: {
     height: 80,
     width: '100%',

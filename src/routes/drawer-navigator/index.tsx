@@ -1,24 +1,24 @@
+import Text from '@components/Text'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer'
+import { getMerchantById } from '@store/actions/merchant'
 import React from 'react'
-import {createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem} from '@react-navigation/drawer'
+import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import DashboardReport from 'screens/dashboard-report'
 import ListProduct from 'screens/list-product'
 import ManageProductMenu from 'screens/manage-product-menu'
 import ManageStore from 'screens/manage-store'
-import DashboardReport from 'screens/dashboard-report'
-import {Alert, Image, TouchableOpacity, View, StyleSheet} from 'react-native'
-import {getMerchantById} from '@store/actions/merchant'
-import Text from '@components/Text'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import {persistor} from 'store/store'
+import { persistor } from 'store/store'
 //@ts-ignore
 import RNRestart from 'react-native-restart'
-import {useSelector, useDispatch} from 'react-redux'
-import {theme} from 'utils/theme'
+import { useDispatch, useSelector } from 'react-redux'
+import { theme } from 'utils/theme'
 
 const Drawer = createDrawerNavigator()
 
 export default function DrawerNavigator() {
-  const {user} = useSelector((state: any) => state.auth)
+  const { user } = useSelector((state: any) => state.auth)
   const isAdmin = user?.role === 'admin'
   const superAdmin = user?.role === 'superadmin'
 
@@ -29,12 +29,12 @@ export default function DrawerNavigator() {
           name="ListProduct"
           component={ListProduct}
           options={{
-            drawerLabel: ({focused, color}) => (
-              <Text type={focused ? 'semibold' : 'regular'} style={[{color: color}, styles.labelSpace]}>
+            drawerLabel: ({ focused, color }) => (
+              <Text type={focused ? 'semibold' : 'regular'} style={[{ color: color }, styles.labelSpace]}>
                 Katalog
               </Text>
             ),
-            drawerIcon: ({color, size}) => <MaterialCommunityIcons name="view-dashboard" color={color} size={size} />,
+            drawerIcon: ({ color, size }) => <MaterialCommunityIcons name="view-dashboard" color={color} size={size} />,
             headerStyle: {
               backgroundColor: 'red',
             },
@@ -46,12 +46,12 @@ export default function DrawerNavigator() {
           name="DashboardReport"
           component={DashboardReport}
           options={{
-            drawerLabel: ({focused, color}) => (
-              <Text type={focused ? 'semibold' : 'regular'} style={[{color: color}, styles.labelSpace]}>
+            drawerLabel: ({ focused, color }) => (
+              <Text type={focused ? 'semibold' : 'regular'} style={[{ color: color }, styles.labelSpace]}>
                 Laporan
               </Text>
             ),
-            drawerIcon: ({color, size}) => (
+            drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="book-open-page-variant" color={color} size={size} />
             ),
           }}
@@ -62,12 +62,12 @@ export default function DrawerNavigator() {
           name="ManageProductMenu"
           component={ManageProductMenu}
           options={{
-            drawerLabel: ({focused, color}) => (
-              <Text type={focused ? 'semibold' : 'regular'} style={[{color: color}, styles.labelSpace]}>
+            drawerLabel: ({ focused, color }) => (
+              <Text type={focused ? 'semibold' : 'regular'} style={[{ color: color }, styles.labelSpace]}>
                 Kelola Produk
               </Text>
             ),
-            drawerIcon: ({color, size}) => <MaterialCommunityIcons name="basket-fill" color={color} size={size} />,
+            drawerIcon: ({ color, size }) => <MaterialCommunityIcons name="basket-fill" color={color} size={size} />,
           }}
         />
       )}
@@ -76,9 +76,9 @@ export default function DrawerNavigator() {
           name="ManageStore"
           component={ManageStore}
           options={{
-            drawerIcon: ({color, size}) => <MaterialCommunityIcons name="storefront" color={color} size={size} />,
-            drawerLabel: ({focused, color}) => (
-              <Text type={focused ? 'semibold' : 'regular'} style={[{color: color}, styles.labelSpace]}>
+            drawerIcon: ({ color, size }) => <MaterialCommunityIcons name="storefront" color={color} size={size} />,
+            drawerLabel: ({ focused, color }) => (
+              <Text type={focused ? 'semibold' : 'regular'} style={[{ color: color }, styles.labelSpace]}>
                 Kelola Toko
               </Text>
             ),
@@ -91,7 +91,7 @@ export default function DrawerNavigator() {
 
 function CustomDrawerContent(props: any) {
   const dispatch = useDispatch()
-  const {user, merchant} = useSelector((state: any) => state.auth)
+  const { user, merchant } = useSelector((state: any) => state.auth)
   const superAdmin = user?.role === 'superadmin'
   return (
     <DrawerContentScrollView {...props}>
@@ -103,7 +103,7 @@ function CustomDrawerContent(props: any) {
             <>
               <View style={styles.infoWrapper}>
                 <View style={styles.info}>
-                  <Image source={{uri: merchant.image}} style={styles.image} />
+                  <Image source={{ uri: merchant.image }} style={styles.image} />
                   <View style={styles.infoPadding}>
                     <Text type="regular" size={8} maxLines={1}>
                       {user?.role}
@@ -136,9 +136,9 @@ function CustomDrawerContent(props: any) {
         <DrawerItem
           activeBackgroundColor={theme.colors.primary}
           activeTintColor={theme.colors.white}
-          icon={({color, size}) => <MaterialCommunityIcons name="logout" color={color} size={size} />}
-          label={({focused, color}) => (
-            <Text type="regular" style={[{color: color}, styles.labelSpace]}>
+          icon={({ color, size }) => <MaterialCommunityIcons name="logout" color={color} size={size} />}
+          label={({ focused, color }) => (
+            <Text type="regular" style={[{ color: color }, styles.labelSpace]}>
               Log out
             </Text>
           )}

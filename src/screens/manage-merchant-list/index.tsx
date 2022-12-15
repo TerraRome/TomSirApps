@@ -1,13 +1,15 @@
-import CustomButton from '@components/Button'
-import Text from '@components/Text'
-import { useIsFocused, useNavigation } from '@react-navigation/native'
-import { getMerchants } from '@services/merchant'
-import { setMerchant } from '@store/actions/merchant'
-import { theme } from '@utils/theme'
 import React, { useCallback, useEffect, useState } from 'react'
-import { FlatList, RefreshControl, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import { View, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, RefreshControl, TextInput } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { useIsFocused } from '@react-navigation/native'
+import { useSelector, useDispatch } from 'react-redux'
+import { theme } from '@utils/theme'
+import Text from '@components/Text'
+import { getMerchantById } from '@store/actions/merchant'
+import CustomButton from '@components/Button'
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import { useDispatch, useSelector } from 'react-redux'
+import { setMerchant } from '@store/actions/merchant'
+import { getMerchants } from '@services/merchant'
 
 interface Merchant {
   id: string
@@ -74,6 +76,8 @@ const ManageMerchantList: React.FC = () => {
       address: item?.address,
       phone: item?.phone_number,
       footer_note: item?.footer_note,
+      server_key: item?.server_key,
+      client_key: item?.client_key,
       image: item?.image,
       isEdit: true,
     })

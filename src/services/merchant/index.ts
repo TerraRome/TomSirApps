@@ -7,6 +7,9 @@ interface IAddMerchant {
   address: string
   phone: string
   footer_note: string
+  server_key: string
+  client_key: string
+  catalog: string
   image: ImageSourcePropType
 }
 
@@ -15,6 +18,9 @@ interface IEditMerchant {
   address: string
   phone: string
   footer_note: string
+  server_key: string
+  client_key: string
+  catalog: string
   image: ImageSourcePropType
 }
 

@@ -1,6 +1,6 @@
-import Axios from '@utils/Axios'
 import {AxiosResponse} from 'axios'
 import qs from 'query-string'
+import Axios from '@utils/Axios'
 
 export interface Product {
   id: string
@@ -22,9 +22,8 @@ export interface OrderPay {
 export interface Order extends OrderPay {
   type_order: string
   note_order: string
-  whatsapp: string
   products: Product[]
-  status: 'hold' | 'paid'
+  status: 'hold' | 'paid' | 'refund' | 'confirm'
 }
 export interface IAddProductOrder {
   id: string
@@ -147,11 +146,23 @@ export const getOrderList = async (params: {
   limit: string | number
   sortBy?: 'type' | 'code' | 'createdAt'
   order?: 'ASC' | 'DESC'
-  status?: 'hold' | 'paid'
-  merchant_id: string
+  status?: 'hold' | 'paid' | 'refund'
   search?: string
+  merchant_id: string
 }): Promise<AxiosResponse> => {
   return await Axios.get(`api/v1/order?${qs.stringify(params)}`)
+}
+
+export const getOrderListWithStatus = async (params: {
+  page: string | number
+  limit: string | number
+  sortBy?: 'type' | 'code' | 'createdAt'
+  order?: 'ASC' | 'DESC'
+  status?: 'hold' | 'paid' | 'refund'
+  search?: string
+  merchant_id: string
+}): Promise<AxiosResponse> => {
+  return await Axios.get(`api/v1/order/status?${qs.stringify(params)}`)
 }
 
 export const getOrderById = async (id: string): Promise<AxiosResponse> => {
@@ -166,6 +177,12 @@ export const updateOrder = async (
   data: Order,
 ): Promise<AxiosResponse<IResOrder>> => {
   return await Axios.put(`api/v1/order/${data.id}`, data)
+}
+
+export const refundOrder = async (
+  data: Order,
+): Promise<AxiosResponse<IResOrder>> => {
+  return await Axios.put(`api/v1/order/refund/${data.id}`, data)
 }
 
 export const addProductOrder = async (

@@ -1,24 +1,27 @@
-import CalendarPicker from '@components/CalendarPicker'
-import Loader from '@components/Loader'
+import React, { useState, useCallback, useEffect } from 'react'
+import { View, TouchableOpacity, FlatList, ActivityIndicator, Image, RefreshControl, Share } from 'react-native'
 import Text from '@components/Text'
-import TextInput from '@components/TextInput'
-import { showErrorToast } from '@components/Toast'
-import { useNavigation } from '@react-navigation/core'
-import { useIsFocused } from '@react-navigation/native'
-import moment from 'moment'
-import React, { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, Image, PermissionsAndroid, RefreshControl, Share, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import { StyleSheet } from 'react-native'
 import Feather from 'react-native-vector-icons/Feather'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import { useDispatch, useSelector } from 'react-redux'
-import { getReportExcel, getReportList, getReportSummary } from 'services/report'
-import { setReportHistory, setReportSummary } from 'store/actions/report'
-import { convertToRupiah } from 'utils/convertRupiah'
-import { downloadFile } from 'utils/fetch-blob'
+import { useNavigation } from '@react-navigation/core'
 import { theme } from 'utils/theme'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useDispatch, useSelector } from 'react-redux'
+import { convertToRupiah } from 'utils/convertRupiah'
+import { setReportHistory, setReportSummary } from 'store/actions/report'
+import { showErrorToast } from '@components/Toast'
+import TextInput from '@components/TextInput'
+import { getReportExcel, getReportList, getReportSummary, getReportKas, getReportRegis } from 'services/report'
+import { useIsFocused } from '@react-navigation/native'
+import CalendarPicker from '@components/CalendarPicker'
+import { getAllKas } from 'services/kas'
+import { getAllRegis } from 'services/registration'
+import moment from 'moment'
+import { downloadFile } from 'utils/fetch-blob'
+import Loader from '@components/Loader'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 
 let searchDebounce: any = null
 export default function DashboardReport() {
@@ -26,12 +29,15 @@ export default function DashboardReport() {
   const dispatch = useDispatch()
   const isFocused = useIsFocused()
   const report = useSelector((state: any) => state.report)
+  const { user } = useSelector((state: any) => state.auth)
   const merchant = useSelector((state: any) => state.auth?.merchant)
   const { rows, page_size, current_page } = report.history
 
   const [isLoading, setLoading] = useState(false)
   const [isLoading2, setLoading2] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
+  const [dataKas, setDataKas] = useState("")
+  const [dataRegis, setDataRegis] = useState("")
 
   const [queryParams, setParams] = useState({
     page: 1,
@@ -43,6 +49,32 @@ export default function DashboardReport() {
     start_date: moment().subtract(7, 'days').format('YYYY-MM-DD'),
     end_date: moment().format('YYYY-MM-DD'),
   })
+
+  const [queryKas, setKas] = useState({
+    page: 1,
+    limit: 10,
+    sortBy: 'createdAt',
+    order: 'ASC',
+    merchant_id: user.merchant.id,
+    search: undefined,
+    start_date: moment().subtract(7, 'days').format('YYYY-MM-DD'),
+    end_date: moment().format('YYYY-MM-DD'),
+  })
+
+  const [queryRegis, setRegis] = useState({
+    page: 1,
+    limit: 10,
+    sortBy: 'createdAt',
+    order: 'ASC',
+    merchant_id: user.merchant.id,
+    search: undefined,
+    start_date: moment().subtract(7, 'days').format('YYYY-MM-DD'),
+    end_date: moment().format('YYYY-MM-DD'),
+  })
+
+  const navgate = () => {
+    navigation.navigate('ManageKas')
+  }
 
   const getData = useCallback(
     async (params?: any) => {
@@ -57,9 +89,17 @@ export default function DashboardReport() {
           start_date: queryParams.start_date,
           end_date: queryParams.end_date,
         })
+        const {
+          data: { data: { countKas } },
+        } = await getAllKas({ ...queryKas, ...params })
+        const {
+          data: { data: { countRegis } },
+        } = await getAllRegis({ ...queryRegis, ...params })
+        setDataKas(countKas)
+        setDataRegis(countRegis)
         dispatch(setReportHistory(dataHistory))
         dispatch(setReportSummary(dataSummary))
-      } catch (error: any) {
+      } catch (error) {
         showErrorToast(error.message)
       } finally {
         setLoading(false)
@@ -90,29 +130,63 @@ export default function DashboardReport() {
         start_date: queryParams.start_date,
         end_date: queryParams.end_date,
       })
-      console.log(url);
-
+      // console.log(url)
       const message = `Laporan penjualan ${merchant?.name} dari ${queryParams.start_date} sampai ${queryParams.end_date} `
       const filename = message + url
+      await downloadFile(url, message)
+      Share.share({ url, message: filename, title: filename })
+    } catch (error) {
+      showErrorToast(error.message)
+    } finally {
+      setLoading2(false)
+    }
+  }
 
-      const permission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: 'Permission Needed',
-          message: 'For download purpose',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK'
-        }
-      );
-
-      if (permission === 'denied') return;
-      if (permission === 'granted') {
-        // YOUR WRITE FUNCTION HERE
+  const reportKas = async () => {
+    setLoading2(true)
+    try {
+      if (dataKas != "0") {
+        const {
+          data: { data: url },
+        } = await getReportKas({
+          start_date: queryParams.start_date,
+          end_date: queryParams.end_date,
+        })
+        // console.log(url)
+        const message = `Laporan penjualan ${merchant?.name} dari ${queryParams.start_date} sampai ${queryParams.end_date} `
+        const filename = message + url
         await downloadFile(url, message)
         Share.share({ url, message: filename, title: filename })
+      } else {
+        showErrorToast("Data Kas Kosong")
       }
-    } catch (error: any) {
+    } catch (error) {
+      showErrorToast(error.message)
+    } finally {
+      setLoading2(false)
+    }
+  }
+
+  const reportRegis = async () => {
+    setLoading2(true)
+    try {
+      if (dataRegis != "0") {
+        const {
+          data: { data: url },
+        } = await getReportRegis({
+          start_date: queryParams.start_date,
+          end_date: queryParams.end_date,
+        })
+        // console.log(url)
+        const message = `Laporan penjualan ${merchant?.name} dari ${queryParams.start_date} sampai ${queryParams.end_date} `
+        const filename = message + url
+        await downloadFile(url, message)
+        Share.share({ url, message: filename, title: filename })
+      } else {
+        showErrorToast("Data Modal Kosong")
+      }
+
+    } catch (error) {
       showErrorToast(error.message)
     } finally {
       setLoading2(false)
@@ -133,10 +207,15 @@ export default function DashboardReport() {
 
   const Summary = () => (
     <View style={{ paddingHorizontal: 16 }}>
-      <View style={{ marginBottom: 16 }}>
+      <View style={{ marginBottom: 16, flexDirection: 'row', justifyContent: 'space-between' }}>
         <Text size={10} type="semibold">
           Ringkasan
         </Text>
+        <TouchableOpacity onPress={navgate}>
+          <Text type="semibold" size={8} color="#31AAC3">
+            Manage Kas
+          </Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.wrapSummaryCard}>
         <View style={[styles.summaryCard, styles.shadow, { backgroundColor: '#1FB0B0' }]}>
@@ -191,6 +270,44 @@ export default function DashboardReport() {
           </View>
         </TouchableOpacity>
       </View>
+      <View style={styles.wrapSummaryCard}>
+        <TouchableOpacity
+          onPress={reportKas}
+          activeOpacity={0.8}
+          style={[styles.summaryCard, styles.shadow, { backgroundColor: '#857734' }]}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={{ flex: 0.9 }}>
+              <Text color={theme.colors.white} type="bold" size={10}>
+                {dataKas || '0'}
+              </Text>
+              <Text color={theme.colors.white} size={7}>
+                Total Data Kas
+              </Text>
+            </View>
+            <View style={{ alignSelf: 'flex-end' }}>
+              <Feather name="download" size={18} color={theme.colors.white} />
+            </View>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={reportRegis}
+          activeOpacity={0.8}
+          style={[styles.summaryCard, styles.shadow, { backgroundColor: '#857776' }]}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <View style={{ flex: 0.9 }}>
+              <Text color={theme.colors.white} type="bold" size={10}>
+                {dataRegis || '0'}
+              </Text>
+              <Text color={theme.colors.white} size={7}>
+                Total Data Regis
+              </Text>
+            </View>
+            <View style={{ alignSelf: 'flex-end' }}>
+              <Feather name="download" size={18} color={theme.colors.white} />
+            </View>
+          </View>
+        </TouchableOpacity>
+      </View>
       <View style={{ marginVertical: 16 }}>
         <Text size={10} type="semibold">
           Riwayat
@@ -219,7 +336,7 @@ export default function DashboardReport() {
           Harga Jual : {convertToRupiah(item?.total_price)}
         </Text>
         <Text style={styles.textInfo} size={7} color={theme.colors.label}>
-          Catatan : {item?.note || ' - '}
+          Catatan : {item?.isWeb == 1 ? JSON.parse(item?.note).name || ' - ' : item?.note || ' - '}
         </Text>
       </View>
     </TouchableOpacity>
@@ -272,7 +389,11 @@ export default function DashboardReport() {
                 selectedEndDate={queryParams.end_date}
                 onChange={props => {
                   const params = { ...queryParams, start_date: props.selectedStartDate, end_date: props.selectedEndDate }
+                  const paramKas = { ...queryKas, start_date: props.selectedStartDate, end_date: props.selectedEndDate }
+                  const paramRegis = { ...queryRegis, start_date: props.selectedStartDate, end_date: props.selectedEndDate }
                   setParams(params)
+                  setKas(paramKas)
+                  setRegis(paramRegis)
                 }}
               />
             </View>

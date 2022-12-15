@@ -1,18 +1,19 @@
-import Button from '@components/Button'
+import React, { useState } from 'react'
+import { Platform, StyleSheet, KeyboardAvoidingView, View, ScrollView } from 'react-native'
 import Text from '@components/Text'
-import TextInput from '@components/TextInput'
+import Button from '@components/Button'
 import { showErrorToast } from '@components/Toast'
-import { setAuth } from '@store/actions/auth'
+import { useDispatch } from 'react-redux'
 import { theme } from '@utils/theme'
 import { emailValidator, passwordValidator } from '@utils/validators'
+import { setAuth } from '@store/actions/auth'
+import TextInput from '@components/TextInput'
 import Logo from 'components/Logo'
-import React, { useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
-import { useDispatch } from 'react-redux'
 import { signin } from 'services/auth'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 
-export default function Login() {
+export default function Login({ navigation }: any) {
   const dispatch = useDispatch()
   const [email, setEmail] = useState({
     value: '',
@@ -52,18 +53,21 @@ export default function Login() {
           keyboardVerticalOffset={20}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <Logo source={require('@assets/images/logo2.png')} style={styles.logo} />
+          <Text style={styles.title} type="bold" size={14}>
+            TomSir
+          </Text>
           <Text style={[styles.title, { marginBottom: 32 }]}>Silahkan masuk</Text>
           <TextInput
             value={email.value}
             errorText={email.error}
             placeholder="Ketik email anda"
-            onChangeText={value => setEmail({ value, error: '' })}
+            onChangeText={(value: any) => setEmail({ value, error: '' })}
           />
           <TextInput
             value={password.value}
             errorText={password.error}
             placeholder="Ketik password anda"
-            onChangeText={value => setPassword({ value, error: '' })}
+            onChangeText={(value: any) => setPassword({ value, error: '' })}
             isPassword
           />
           <Button loading={isLoading} onPress={signInWithEmailAndPassword}>
@@ -73,7 +77,7 @@ export default function Login() {
           </Button>
           {/* <View style={[styles.row, { alignSelf: 'center' }]}>
             <Text style={styles.label}>Tidak punya akun? </Text>
-            <TouchableOpacity onPress={() => { }}>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
               <Text style={styles.link}>Register</Text>
             </TouchableOpacity>
           </View> */}

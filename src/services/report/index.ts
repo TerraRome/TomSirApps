@@ -17,6 +17,14 @@ export const getReportExcel = async (params: {start_date: string; end_date: stri
   return await Axios.get(`api/v1/order/report/excel?${qs.stringify(params)}`)
 }
 
+export const getReportKas = async (params: {start_date: string; end_date: string}): Promise<AxiosResponse> => {
+  return await Axios.get(`api/v1/kas/report/excel?${qs.stringify(params)}`)
+}
+
+export const getReportRegis = async (params: {start_date: string; end_date: string}): Promise<AxiosResponse> => {
+  return await Axios.get(`api/v1/registration/report/excel?${qs.stringify(params)}`)
+}
+
 export const getReportById = async (id: string): Promise<AxiosResponse> => {
   return await Axios.get(`api/v1/order/report/${id}`)
 }

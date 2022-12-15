@@ -1,17 +1,18 @@
-import React, {useRef} from 'react'
-import {TouchableOpacity, StyleSheet, Dimensions, View, Image} from 'react-native'
+import React, { useRef, useEffect } from 'react'
+import { TouchableOpacity, StyleSheet, Dimensions, View, Image } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import {theme} from '@utils/theme'
+import { theme } from '@utils/theme'
 import Text from '@components/Text'
-import {convertToRupiah} from 'utils/convertRupiah'
+import { convertToRupiah } from 'utils/convertRupiah'
 import Modalize from 'components/Modalize'
 import WrapFooterButton from '@components/WrapFooterButton'
 import Button from '@components/Button'
-import {useNavigation} from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import calculateCart from 'utils/calculateCart'
-const {width: SCREEN_WIDTH} = Dimensions.get('window')
+import { showErrorToast } from 'components/Toast'
+const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
-export default function Card({item, index, carts = [], onPress, numColumns = 3}: any) {
+export default function Card({ item, index, carts = [], onPress, numColumns = 3 }: any) {
   const navigation = useNavigation()
   const modalRef: any = useRef()
   const cart = carts?.length > 0 && carts?.find((e: any) => e.id === item.id)
@@ -19,6 +20,7 @@ export default function Card({item, index, carts = [], onPress, numColumns = 3}:
   const discountNominal = item?.is_disc_percentage ? (parseFloat(item?.price) * item?.disc) / 100 : item?.disc
   const discountPrice = item.price - discountNominal
   const calculate = calculateCart(cartRelated)
+
   return (
     <React.Fragment key={item.id}>
       <TouchableOpacity
@@ -29,7 +31,11 @@ export default function Card({item, index, carts = [], onPress, numColumns = 3}:
             modalRef?.current?.open()
             return
           }
-          navigation.navigate('DetailProduct', {item, cart})
+          if (item.stock == 0) {
+            showErrorToast("Stok Habis")
+            return
+          }
+          navigation.navigate('DetailProduct', { item, cart })
           // onPress()
         }}
         style={[
@@ -51,53 +57,58 @@ export default function Card({item, index, carts = [], onPress, numColumns = 3}:
             <Ionicons name="ios-image-outline" size={25} color={theme.colors.grey} />
           </View>
         ) : (
-          <Image
-            source={{
-              uri: item.image,
-            }}
-            style={[
-              styles.image,
-              {
-                maxWidth: SCREEN_WIDTH / (numColumns + 0.3),
-                height: SCREEN_WIDTH / (numColumns + 0.3),
-              },
-            ]}
-          />
-        )}
-        <View style={{flexDirection: 'row'}}>
+            <Image
+              source={{
+                uri: item.image,
+              }}
+              style={[
+                styles.image,
+                {
+                  maxWidth: SCREEN_WIDTH / (numColumns + 0.3),
+                  height: SCREEN_WIDTH / (numColumns + 0.3),
+                },
+              ]}
+            />
+          )}
+        <View style={{ flexDirection: 'row' }}>
           {cartRelated?.length > 0 && (
-            <Text size={7} color={theme.colors.primary} style={{marginRight: 6}}>
+            <Text size={7} color={theme.colors.primary} style={{ marginRight: 6 }}>
               {calculate.qty}x
             </Text>
           )}
           <Text
             size={7}
             maxLines={2}
-            style={{flex: 0.95}}
+            style={{ flex: 0.95 }}
             color={cartRelated?.length > 0 ? theme.colors.primary : theme.colors.black}>
             {item.name}
           </Text>
         </View>
-        <Text size={7} type="semibold">
-          {convertToRupiah(discountPrice)}{' '}
-        </Text>
-        {discountNominal > 0 && (
-          <Text size={6} type="regular" style={{textDecorationLine: 'line-through'}}>
-            {convertToRupiah(item.price)}
+        <View style={{flexDirection: 'row'}}>
+          <Text size={5} type="semibold">
+            {convertToRupiah(discountPrice)}{' '}
           </Text>
-        )}
+          {discountNominal > 0 && (
+            <Text size={5} type="regular" style={{ textDecorationLine: 'line-through' }}>
+              {convertToRupiah(item.price)}
+            </Text>
+          )}
+          <Text size={5} type="semibold">
+            (Stok {item.stock == 0 ? "Habis" : item.stock})
+          </Text>
+        </View>
       </TouchableOpacity>
-      <Modalize style={{paddingBottom: 0}} ref={modalRef}>
-        <View style={{paddingHorizontal: 16}}>
+      <Modalize style={{ paddingBottom: 0 }} ref={modalRef}>
+        <View style={{ paddingHorizontal: 16 }}>
           <View style={styles.wrapHeaderDetail}>
-            <Text type="semibold" size={10} style={{flex: 0.9}}>
+            <Text type="semibold" size={10} style={{ flex: 0.9 }}>
               {item.name}
             </Text>
-            <View style={{alignItems: 'flex-end'}}>
+            <View style={{ alignItems: 'flex-end' }}>
               <Text type="semibold" size={10}>
                 {convertToRupiah(discountPrice)}
               </Text>
-              <Text size={8} type="regular" style={{textDecorationLine: 'line-through'}}>
+              <Text size={8} type="regular" style={{ textDecorationLine: 'line-through' }}>
                 {convertToRupiah(item.price)}
               </Text>
             </View>
@@ -115,12 +126,12 @@ export default function Card({item, index, carts = [], onPress, numColumns = 3}:
                   <TouchableOpacity
                     onPress={() => {
                       modalRef?.current?.close()
-                      navigation.navigate('DetailProduct', {item, cart})
+                      navigation.navigate('DetailProduct', { item, cart })
                     }}
                     style={styles.cartItem}>
-                    <View style={{flex: 0.9, flexDirection: 'row'}}>
+                    <View style={{ flex: 0.9, flexDirection: 'row' }}>
                       <Text type="semibold">{cart.qty}x</Text>
-                      <View style={{flexDirection: 'column', marginLeft: 20}}>
+                      <View style={{ flexDirection: 'column', marginLeft: 20 }}>
                         <Text>
                           {cart?.addons?.length > 0 ? cart.addons.map((e: any) => e.name).join(', ') : cart.name}
                         </Text>
@@ -140,7 +151,7 @@ export default function Card({item, index, carts = [], onPress, numColumns = 3}:
           <Button
             onPress={() => {
               modalRef?.current?.close()
-              navigation.navigate('DetailProduct', {item})
+              navigation.navigate('DetailProduct', { item })
             }}>
             <Text color="white" type="semibold">
               Satu Lagi
@@ -154,7 +165,7 @@ export default function Card({item, index, carts = [], onPress, numColumns = 3}:
 
 const styles = StyleSheet.create({
   container: {
-    flex: 0.5,
+    flex: 0.35,
     paddingLeft: 12,
     marginBottom: 22,
   },

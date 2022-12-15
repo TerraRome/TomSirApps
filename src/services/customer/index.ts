@@ -5,24 +5,28 @@ import Axios from '@utils/Axios'
 interface Customer {
   name: string
   email: string
-  phone_number: number
+  phone_number: string
+  merchant_id: string
 }
 
 export const addCustomer = async (data: Customer): Promise<AxiosResponse> => {
-  return await Axios.post('api/v1/customer', data, {
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+  return await Axios.post('api/v1/customer', data)
 }
 
-export const getCustomer = async (params: {
+export const getCustomers = async (params: {
   page: string | number
   limit: string | number
   sortBy?: 'createdAt'
   order?: 'ASC'
-  name: string
+  merchant_id: string
 }): Promise<AxiosResponse> => {
   return await Axios.get(`api/v1/customer?${qs.stringify(params)}`)
+}
+
+export const editCustomer = async (id: string, data: Customer): Promise<AxiosResponse> => {
+  return await Axios.put(`api/v1/customer/${id}`, data)
+}
+
+export const deleteCustomer = async (id: string): Promise<AxiosResponse> => {
+  return await Axios.delete(`api/v1/customer/${id}`)
 }

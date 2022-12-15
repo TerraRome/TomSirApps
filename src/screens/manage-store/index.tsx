@@ -1,15 +1,30 @@
-import React from 'react'
-import {View, StyleSheet, TouchableOpacity} from 'react-native'
-import {theme} from '@utils/theme'
 import Text from '@components/Text'
-import {useSelector} from 'react-redux'
+import { useNavigation } from '@react-navigation/native'
+import { theme } from '@utils/theme'
+import React from 'react'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import Feather from 'react-native-vector-icons/Feather'
-import {useNavigation} from '@react-navigation/native'
-import {SafeAreaView} from 'react-native-safe-area-context'
+import { useSelector } from 'react-redux'
+
+const storeMenu = [
+  // {
+  //   key: 'ManageCustomer',
+  //   title: 'Kelola Customer',
+  // },
+  {
+    key: 'ManageTypeOrder',
+    title: 'Kelola Tipe Order',
+  },
+  {
+    key: 'ManageKas',
+    title: 'Kelola Kas',
+  },
+]
 
 const ManageStore = () => {
   const navigation = useNavigation()
-  const {user, merchant} = useSelector((state: any) => state.auth)
+  const { user, merchant } = useSelector((state: any) => state.auth)
   const isAdmin = user?.role === 'admin'
 
   const onPressManageMerchant = () => {
@@ -20,6 +35,9 @@ const ManageStore = () => {
         address: merchant?.address,
         phone: merchant?.phone_number,
         footer_note: merchant?.footer_note,
+        server_key: merchant?.server_key,
+        client_key: merchant?.client_key,
+        catalog: merchant?.catalog,
         image: merchant?.image,
         isEdit: true,
       })
@@ -66,6 +84,24 @@ const ManageStore = () => {
           </View>
         </TouchableOpacity>
         <View style={styles.divider} />
+        {storeMenu.map((item, index) => (
+          <>
+            <TouchableOpacity
+              style={styles.productMenuList}
+              key={index}
+              onPress={() => {
+                navigation.navigate(item.key)
+              }}>
+              <View style={styles.flexRow}>
+                <Text type="default" style={styles.productMenuTitle}>
+                  {item.title}
+                </Text>
+                <Feather name="chevron-right" size={22} color={theme.colors.grey} />
+              </View>
+            </TouchableOpacity>
+            <View style={styles.divider} />
+          </>
+        ))}
       </View>
     </SafeAreaView>
   )

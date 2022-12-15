@@ -1,26 +1,26 @@
-import React, {useState} from 'react'
-import {Platform, StyleSheet, KeyboardAvoidingView, View, TouchableOpacity} from 'react-native'
+import React, { useState } from 'react'
+import { Platform, StyleSheet, KeyboardAvoidingView, View, TouchableOpacity } from 'react-native'
 import Text from '@components/Text'
 import Button from '@components/Button'
-import {showErrorToast} from '@components/Toast'
-import {useDispatch} from 'react-redux'
-import {theme} from '@utils/theme'
-import {setAuth} from '@store/actions/auth'
+import { showErrorToast } from '@components/Toast'
+import { useDispatch } from 'react-redux'
+import { theme } from '@utils/theme'
+import { setAuth } from '@store/actions/auth'
 import TextInput from '@components/TextInput'
-import {emailValidator, passwordValidator} from '@utils/validators'
+import { emailValidator, passwordValidator } from '@utils/validators'
 
-function Register({navigation}: any) {
+function Register({ navigation }: any) {
   const dispatch = useDispatch()
-  const [email, setEmail] = useState({value: '', error: ''})
-  const [password, setPassword] = useState({value: '', error: ''})
+  const [email, setEmail] = useState({ value: '', error: '' })
+  const [password, setPassword] = useState({ value: '', error: '' })
   const [isLoading, setLoading] = useState(false)
 
   const createUserWithEmailAndPassword = (): void => {
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
     if (emailError || passwordError) {
-      setEmail({...email, error: emailError})
-      setPassword({...password, error: passwordError})
+      setEmail({ ...email, error: emailError })
+      setPassword({ ...password, error: passwordError })
       return
     }
   }
@@ -36,13 +36,13 @@ function Register({navigation}: any) {
           value={email.value}
           errorText={email.error}
           placeholder="Type your email"
-          onChangeText={value => setEmail({value, error: ''})}
+          onChangeText={value => setEmail({ value, error: '' })}
         />
         <TextInput
           value={password.value}
           errorText={password.error}
           placeholder="Type your password"
-          onChangeText={value => setPassword({value, error: ''})}
+          onChangeText={value => setPassword({ value, error: '' })}
           isPassword
         />
 
@@ -52,7 +52,7 @@ function Register({navigation}: any) {
           </Text>
         </Button>
 
-        <View style={[styles.row, {alignSelf: 'center'}]}>
+        <View style={[styles.row, { alignSelf: 'center' }]}>
           <Text style={styles.label}>Already have account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
             <Text style={styles.link}>Sign in</Text>

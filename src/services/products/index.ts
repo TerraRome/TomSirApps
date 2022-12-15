@@ -7,8 +7,13 @@ import store from '@store/store'
 interface IAddProduct {
   name: string
   description: string
+  sell_type: boolean
+  modal: number
   price: number
+  sku: string
+  barcode: string
   category_id: string
+  price_product_id: string
   image: ImageSourcePropType
   stock: string
   addon_categories: Array<string>
@@ -18,8 +23,13 @@ interface IAddProduct {
 interface IEditProduct {
   name: string
   description: string
+  sell_type: boolean
+  modal: number
   price: number
+  sku: string
+  barcode: string
   category_id: string
+  price_product_id: string
   image: ImageSourcePropType
   stock: string
   disc: number
@@ -43,6 +53,10 @@ export const getProducts = async (params: {
 
 export const getProduct = async (id: string): Promise<AxiosResponse> => {
   return await Axios.get(`api/v1/product/${id}`)
+}
+
+export const getBarcodeProduct = async (params: {barcode: string}): Promise<AxiosResponse> => {
+  return await Axios.get(`api/v1/product/scan?${qs.stringify(params)}`)
 }
 
 export const addProduct = async (data: IAddProduct): Promise<AxiosResponse> => {

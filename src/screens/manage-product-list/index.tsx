@@ -1,16 +1,17 @@
-import React, {useState, useEffect, useCallback} from 'react'
-import {View, StyleSheet, TextInput, TouchableOpacity, FlatList, RefreshControl, Image} from 'react-native'
-import {useIsFocused} from '@react-navigation/native'
-import {useNavigation} from '@react-navigation/native'
-import {useSelector, useDispatch} from 'react-redux'
-import {getProducts} from 'services/products'
-import {setProducts} from 'store/actions/products'
+import React, { useState, useEffect, useCallback } from 'react'
+import { View, StyleSheet, TextInput, TouchableOpacity, FlatList, RefreshControl, Image } from 'react-native'
+import { useIsFocused } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
+import { useSelector, useDispatch } from 'react-redux'
+import { getProducts } from 'services/products'
+import { setProducts } from 'store/actions/products'
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import {setIngredientItem} from 'store/actions/ingredient'
-import {theme} from '@utils/theme'
+import { getPriceProduct } from '@services/price-product'
+import { setIngredientItem } from 'store/actions/ingredient'
+import { theme } from '@utils/theme'
 import Text from '@components/Text'
 import CustomButton from '@components/Button'
-import {convertToRupiah} from '@utils/convertRupiah'
+import { convertToRupiah } from '@utils/convertRupiah'
 
 interface Product {
   id: string
@@ -32,8 +33,8 @@ const ManageProductList: React.FC = () => {
   const dispatch = useDispatch()
   const [isLoading, setLoading] = useState(false)
   const navigation = useNavigation()
-  const {user} = useSelector((state: any) => state.auth)
-  const {rows, page_size, current_page} = useSelector((state: any) => state.products)
+  const { user } = useSelector((state: any) => state.auth)
+  const { rows, page_size, current_page } = useSelector((state: any) => state.products)
 
   const [queryParams, setParams] = useState({
     page: 1,
@@ -50,7 +51,7 @@ const ManageProductList: React.FC = () => {
   }, [isFocused])
 
   const refreshData = (param?: any) => {
-    getData({page: 1, ...param})
+    getData({ page: 1, ...param })
   }
 
   const getData = useCallback(
@@ -61,8 +62,8 @@ const ManageProductList: React.FC = () => {
           delete queryParams.search
         }
         const {
-          data: {data},
-        } = await getProducts({...queryParams, ...params})
+          data: { data },
+        } = await getProducts({ ...queryParams, ...params })
         dispatch(setProducts(data))
       } catch (error) {
       } finally {
@@ -78,29 +79,44 @@ const ManageProductList: React.FC = () => {
     if (isLoading || !hasNextPage) {
       return
     }
-    getData({page: nextPage})
+    getData({ page: nextPage })
   }
 
   const handleSearch = (search: any) => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => {
-      refreshData({search})
+      refreshData({ search })
     }, 400)
-    setParams({...queryParams, search})
+    setParams({ ...queryParams, search })
   }
 
-  const onPressProduct = (item: any) => () => {
-    const ingredient = item?.ingredient?.map(({id, name, tbl_product_ingredient: {qty}, unit}: any) => {
-      return {id, name, unit, qty}
+  const getPrice = async (id: any) => {
+    try {
+      const { data: { data } } = await getPriceProduct(id)
+      return data
+    } catch (error) {
+      return ""
+    }
+  }
+
+  const onPressProduct = (item: any) => async () => {
+    const ingredient = item?.ingredient?.map(({ id, name, tbl_product_ingredient: { qty }, unit }: any) => {
+      return { id, name, unit, qty }
     })
     dispatch(setIngredientItem(ingredient))
+
+    const datas = await getPrice(item.price_product_id)
 
     return navigation.navigate('AddProduct', {
       id: item?.id,
       name: item?.name,
       description: item?.description,
       stock: item?.stock,
+      sell_type: item?.sell_type,
+      modal: item?.modal,
       price: item?.price,
+      sku: item?.sku,
+      barcode: item?.barcode,
       category_id: item?.category_id,
       image: item?.image,
       is_disc_percentage: item?.is_disc_percentage,
@@ -108,10 +124,11 @@ const ManageProductList: React.FC = () => {
       categoryName: item?.category?.name,
       isEdit: true,
       addonCategory: item?.addon_category,
+      priceInfo: datas
     })
   }
 
-  const renderItem = ({item}: {item: Product}) => {
+  const renderItem = ({ item }: { item: Product }) => {
     return (
       <TouchableOpacity style={styles.productList} onPress={onPressProduct(item)}>
         <Text>{item?.name}</Text>

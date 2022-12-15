@@ -26,6 +26,7 @@ const ManageMerchant = ({ navigation, route }: any) => {
   const { user } = useSelector((state: any) => state.auth)
   const isAdmin = user?.role === 'admin'
 
+  const [link, setLink] = useState('TomsirApp/')
   const [merchant, setMerchant] = useState<any>({
     name: route?.params?.name || '',
     address: route?.params?.address || '',
@@ -33,6 +34,9 @@ const ManageMerchant = ({ navigation, route }: any) => {
     footer_note: route?.params?.footer_note || '',
     image: '',
     imageUri: route?.params?.image || '',
+    client_key: route?.params?.client_key || '',
+    server_key: route?.params?.server_key || '',
+    catalog: route?.params?.catalog || '',
   })
 
   const onChange = (type: string) => (value: any) => {
@@ -60,7 +64,7 @@ const ManageMerchant = ({ navigation, route }: any) => {
   }
 
   const onCreateMerchant = async () => {
-    const { name, address, phone, footer_note, image } = merchant
+    const { name, address, phone, footer_note, client_key, server_key, image, catalog } = merchant
 
     const formData: any = new FormData()
     formData.append('name', name)
@@ -83,7 +87,7 @@ const ManageMerchant = ({ navigation, route }: any) => {
           showSuccessToast('Berhasil memperbarui data merchant')
           if (isAdmin) {
             dispatch(getMerchantById)
-            navigation.navigate('ManageStore')
+            navigation.navigate('ListProduct')
           } else {
             navigation.navigate('ManageMerchantList')
           }

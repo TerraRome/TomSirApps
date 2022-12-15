@@ -1,6 +1,6 @@
 import {
-  getMerchantId,
   getMerchants as getMerchantList,
+  getMerchantId,
 } from '@services/merchant'
 import store from '@store/store'
 
@@ -32,7 +32,7 @@ export const getMerchantById = () => async (dispatch: any) => {
       data: {data},
     } = await getMerchantId(merchant_id)
     dispatch(setMerchantById(data))
-  } catch (error: any) {
+  } catch (error) {
     // console.log(error)
   }
 }

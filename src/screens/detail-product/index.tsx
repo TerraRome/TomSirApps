@@ -1,28 +1,35 @@
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useLayoutEffect, useEffect, useState, useCallback } from 'react'
 import {
-  Alert, Image,
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  Image,
   ScrollView,
-  StatusBar, StyleSheet, TextInput as PureTextInput, TouchableOpacity, View
+  StatusBar,
+  TextInput as PureTextInput,
+  Alert,
 } from 'react-native'
 
-import { theme } from '@utils/theme'
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
-import Entypo from 'react-native-vector-icons/Entypo'
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import { useDispatch } from 'react-redux'
+import Entypo from 'react-native-vector-icons/Entypo'
+import { useSelector, useDispatch } from 'react-redux'
+import { theme } from '@utils/theme'
 
+import WrapFooterButton from '@components/WrapFooterButton'
 import BackButton from '@components/BackButton'
 import Button from '@components/Button'
 import Text from '@components/Text'
-import WrapFooterButton from '@components/WrapFooterButton'
-import CheckBox from '@react-native-community/checkbox'
 import { useNavigation, useRoute } from '@react-navigation/native'
-import TextInput from 'components/TextInput'
-import { showErrorToast } from 'components/Toast'
-import { getProduct } from 'services/products'
 import { changeCartItem, removeCartItem } from 'store/actions/carts'
-import { convertToRupiah } from 'utils/convertRupiah'
+import TextInput from 'components/TextInput'
+import { convertToAngka, convertToRupiah } from 'utils/convertRupiah'
+import { getProduct } from 'services/products'
+import { getPriceProduct } from '@services/price-product'
+import { showErrorToast } from 'components/Toast'
+import CheckBox from '@react-native-community/checkbox'
 //@ts-ignore
 import { RadioButtonInput } from 'react-native-simple-radio-button'
 
@@ -38,7 +45,7 @@ export default function DetailProduct() {
     note: cart?.note || '',
     addons: cart?.addons || [],
   })
-
+  const [priceProduct, setPrice] = useState({})
   const [product, setProduct] = useState(item)
 
   const totalPriceAddons = state.addons.reduce((acc: number, curr: any) => acc + parseFloat(curr.price), 0)
@@ -56,8 +63,6 @@ export default function DetailProduct() {
     const expired = e.exp_date ? new Date() > new Date(e.exp_date) : false
     return expired
   })
-
-  // console.log(expiredIngredient)
 
   const discountPrice = parseFloat(item.price) - nominalDiscount
 
@@ -91,7 +96,21 @@ export default function DetailProduct() {
 
   useEffect(() => {
     getData()
+    getPrice()
   }, [])
+
+  const getPrice = async () => {
+    try {
+      const { data: { data } } = await getPriceProduct(item.price_product_id)
+      setPrice({
+        priceInfo: JSON.parse(data.price_info)
+      })
+    } catch (error) {
+      setPrice({
+        priceInfo: null
+      })
+    }
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -117,7 +136,10 @@ export default function DetailProduct() {
             let data = cart || item
             Object.assign(data, state)
             dispatch(changeCartItem(data))
-            navigation.goBack()
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'DrawerNavigator' }],
+            });
           },
         },
       ],
@@ -143,9 +165,12 @@ export default function DetailProduct() {
       })
     } else {
       let data = cart || item
-      Object.assign(data, state)
+      Object.assign(data, state, priceProduct)
       dispatch(changeCartItem(data))
-      navigation.goBack()
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'DrawerNavigator' }],
+      });
     }
   }
 
@@ -361,7 +386,7 @@ export default function DetailProduct() {
             <TouchableOpacity
               onPress={() => {
                 dispatch(removeCartItem(cart))
-                navigation.goBack()
+                navigation.navigate('DrawerNavigator')
               }}>
               <Text color="#EF6454">Hapus Produk</Text>
             </TouchableOpacity>

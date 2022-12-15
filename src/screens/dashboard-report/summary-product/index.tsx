@@ -1,16 +1,16 @@
-import React, {useState, useCallback, useEffect} from 'react'
-import {View, TouchableOpacity, FlatList, ActivityIndicator, Image, RefreshControl} from 'react-native'
+import React, { useState, useCallback, useEffect } from 'react'
+import { View, TouchableOpacity, FlatList, ActivityIndicator, Image, RefreshControl } from 'react-native'
 import TextInput from '@components/TextInput'
 import Text from '@components/Text'
-import {StyleSheet} from 'react-native'
+import { StyleSheet } from 'react-native'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import {theme} from 'utils/theme'
-import {convertToRupiah} from 'utils/convertRupiah'
-import {showErrorToast} from '@components/Toast'
-import {getReportSummaryProduct} from 'services/report'
-import {useIsFocused, useRoute} from '@react-navigation/native'
-import {widthPercentageToDP as wp} from 'react-native-responsive-screen'
+import { theme } from 'utils/theme'
+import { convertToRupiah } from 'utils/convertRupiah'
+import { showErrorToast } from '@components/Toast'
+import { getReportSummaryProduct } from 'services/report'
+import { useIsFocused, useRoute } from '@react-navigation/native'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import CalendarPicker from '@components/CalendarPicker'
 
 let searchDebounce: any = null
@@ -34,8 +34,8 @@ export default function ReportSummaryProduct() {
       setLoading(true)
       try {
         const {
-          data: {data},
-        } = await getReportSummaryProduct({...queryParams, ...params})
+          data: { data },
+        } = await getReportSummaryProduct({ ...queryParams, ...params })
         setRows(data)
       } catch (error) {
         showErrorToast(error.message)
@@ -49,9 +49,9 @@ export default function ReportSummaryProduct() {
   const handleSearch = (search: any) => {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(() => {
-      getData({search})
+      getData({ search })
     }, 400)
-    setParams({...queryParams, search})
+    setParams({ ...queryParams, search })
   }
 
   useEffect(() => {
@@ -60,11 +60,11 @@ export default function ReportSummaryProduct() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.content, {marginBottom: 16}]}>
+      <View style={[styles.content, { marginBottom: 16 }]}>
         {isSearching || queryParams.search ? (
           <View style={styles.rowCenter}>
             <TextInput
-              style={{flex: 1, marginVertical: 0}}
+              style={{ flex: 1, marginVertical: 0 }}
               value={queryParams.search}
               placeholder="Cari nama produk..."
               onChangeText={handleSearch}
@@ -80,12 +80,12 @@ export default function ReportSummaryProduct() {
           </View>
         ) : (
           <View style={styles.rowCenter}>
-            <View style={{flex: 0.9}}>
+            <View style={{ flex: 0.9 }}>
               <CalendarPicker
                 selectedStartDate={queryParams.start_date}
                 selectedEndDate={queryParams.end_date}
                 onChange={props => {
-                  const params = {...queryParams, start_date: props.selectedStartDate, end_date: props.selectedEndDate}
+                  const params = { ...queryParams, start_date: props.selectedStartDate, end_date: props.selectedEndDate }
                   getData(params)
                   setParams(params)
                 }}
@@ -99,9 +99,9 @@ export default function ReportSummaryProduct() {
       </View>
       <FlatList
         data={rows}
-        contentContainerStyle={{paddingBottom: 150}}
+        contentContainerStyle={{ paddingBottom: 150 }}
         keyExtractor={(item: any) => item.id}
-        renderItem={({item: e}: any) => {
+        renderItem={({ item: e }: any) => {
           return (
             <TouchableOpacity activeOpacity={0.6} style={[styles.historyCard]}>
               <View style={styles.wrapInfo}>
@@ -140,7 +140,7 @@ const EmptyList = () => (
   </View>
 )
 
-const Footer = ({loading}: {loading: boolean}) => (
+const Footer = ({ loading }: { loading: boolean }) => (
   <View style={styles.footer}>
     <ActivityIndicator size="large" color={theme.colors.primary} animating={loading} />
   </View>
@@ -188,14 +188,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 7,
   },
-  center: {alignSelf: 'center'},
+  center: { alignSelf: 'center' },
   footer: {
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
   },
-  emptyImage: {width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain'},
+  emptyImage: { width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain' },
   closeSearch: {
     position: 'absolute',
     right: 16,
@@ -211,6 +211,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.defaultBorderColor,
   },
-  rowCenter: {flexDirection: 'row', alignItems: 'center'},
-  downloadButton: {marginRight: 20, flexDirection: 'row', alignItems: 'center'},
+  rowCenter: { flexDirection: 'row', alignItems: 'center' },
+  downloadButton: { marginRight: 20, flexDirection: 'row', alignItems: 'center' },
 })
