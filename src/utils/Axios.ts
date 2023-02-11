@@ -13,7 +13,7 @@ Axios.interceptors.request.use(async config => {
   const token = await getToken()
   Object.assign(config, {
     // baseURL: constants.baseURL,
-    baseURL: 'https://e182-180-254-64-218.ngrok.io',
+    baseURL: 'http://474b-180-254-71-171.ngrok.io',
     timeout: 1000 * 30,
     headers: {
       ...config.headers,

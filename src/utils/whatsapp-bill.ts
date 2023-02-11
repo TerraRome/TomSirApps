@@ -1,12 +1,13 @@
 import moment from 'moment'
 import {Linking} from 'react-native'
 import calculateCart from './calculateCart'
+import {convertToRupiah} from './convertRupiah'
 
 export const whatsappBill = (item: any) => {
   let phoneWithCountryCode = `+62` + item?.whatsapp
   let message = messageBill(item)
 
-  console.log(item)
+  // console.log(item)
 
   Linking.openURL(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
 }
@@ -47,14 +48,16 @@ const messageBill = (item: any) => {
         ? (parseFloat(e?.price) * e?.disc) / 100
         : parseFloat(e?.disc)
       const discountPrice = totalRealPriceItem - nominalDiscount * e?.qty
-      const message = `✅ ${e?.qty} ${e?.name} @ Rp${e?.product?.price}
-Total: Rp${discountPrice}
+      const message = `✅ ${e?.qty} ${e?.name} @ Rp${convertToRupiah(
+        e?.product?.price,
+      )}
+Total: Rp${convertToRupiah(discountPrice)}
 `
 
       return message
     })
 
-    return message
+    return message.join('')
   }
 
   let msg = `FAKTUR ELEKTRONIK
@@ -77,10 +80,14 @@ ${productDetail()}
 =================
 Detail biaya :
 Total tagihan : Rp${subTotalMinusDiscount},-
-Pajak(${item?.tax_percentage}%) : Rp${item?.total_tax}
-Grand total : Rp${item?.total_price},-
-💵 ${item?.payment_type}  : Rp${item?.total_pay},-
-${item?.payment_return > 0 ? 'Kembalian : Rp' + item?.payment_return : ''}
+Pajak ${item?.tax_percentage}% : Rp${convertToRupiah(item?.total_tax)}
+Grand total : Rp${convertToRupiah(item?.total_price)},-
+💵 ${item?.payment_type}  : Rp${convertToRupiah(item?.total_pay)},-
+${
+  item?.payment_return > 0
+    ? 'Kembalian : Rp' + convertToRupiah(item?.payment_return)
+    : ''
+}
 
 Status: Lunas`
 
