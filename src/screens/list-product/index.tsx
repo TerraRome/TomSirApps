@@ -1,46 +1,46 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  RefreshControl,
   ActivityIndicator,
-  TextInput as PureTextInput,
-  Modal,
-  View,
+  FlatList,
   Image,
+  Modal,
+  TextInput as PureTextInput,
+  RefreshControl,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
-import Feather from 'react-native-vector-icons/Feather'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import Entypo from 'react-native-vector-icons/Entypo'
-import { useSelector, useDispatch } from 'react-redux'
+import { convertToRupiah } from '@utils/convertRupiah'
 import { theme } from '@utils/theme'
 import moment from 'moment'
-import { convertToRupiah } from '@utils/convertRupiah'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import Entypo from 'react-native-vector-icons/Entypo'
+import Feather from 'react-native-vector-icons/Feather'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { moneyFormat, convertToAngka } from '@utils/convertRupiah'
-import WrapFooterButton from '@components/WrapFooterButton'
 import Button from '@components/Button'
 import Modalize from '@components/Modalize'
 import Text from '@components/Text'
 import TextInput from '@components/TextInput'
-import { getProducts, addProduct } from '@services/products'
-import { getRegistrationList } from '@services/registration'
-import { getCategory } from '@store/actions/category'
-import { setProducts } from '@store/actions/products'
-import { getTypeOrders } from '@services/typeorder'
-import { setTypeOrder } from '@store/actions/typeorder'
 import { showErrorToast, showSuccessToast } from '@components/Toast'
-import { changeCartItem, removeCartItem } from 'store/actions/carts'
+import WrapFooterButton from '@components/WrapFooterButton'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
+import { addProduct, getProducts } from '@services/products'
+import { getRegistrationList } from '@services/registration'
+import { getTypeOrders } from '@services/typeorder'
+import { getCategory } from '@store/actions/category'
 import { getMerchantById } from '@store/actions/merchant'
-import Card from './product-card'
-import { useNavigation, useIsFocused } from '@react-navigation/native'
+import { setProducts } from '@store/actions/products'
+import { setTypeOrder } from '@store/actions/typeorder'
+import { convertToAngka, moneyFormat } from '@utils/convertRupiah'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { changeCartItem } from 'store/actions/carts'
 import calculateCart from 'utils/calculateCart'
+import Card from './product-card'
 
 let searchDebounce: any = null
 export default function Home() {
@@ -77,7 +77,7 @@ export default function Home() {
 
   const [queryParams, setParams] = useState({
     page: 1,
-    limit: 20,
+    limit: 100,
     sortBy: 'name',
     order: 'ASC',
     merchant_id: user.merchant.id,
@@ -87,7 +87,7 @@ export default function Home() {
 
   const [queryParam, setParam] = useState({
     page: 1,
-    limit: 10,
+    limit: 100,
     sortBy: 'createdAt',
     order: 'ASC',
     merchant_id: user.merchant.id,

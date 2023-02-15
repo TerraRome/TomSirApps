@@ -7,7 +7,8 @@ export const whatsappBill = (item: any) => {
   let phoneWithCountryCode = `+62` + item?.whatsapp
   let message = messageBill(item)
 
-  // console.log(item)
+  console.log(item)
+  console.log(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
 
   Linking.openURL(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
 }
@@ -60,6 +61,10 @@ Total: Rp${convertToRupiah(discountPrice)}
     return message.join('')
   }
 
+  let msgProductDetail = productDetail()
+
+  console.log(msgProductDetail)
+
   let msg = `FAKTUR ELEKTRONIK
 Dr.Clean laundry
 Raya Darmo Baru Barat no 54
@@ -76,7 +81,7 @@ ${moment(item?.createdAt).format('DD MMM YYYY HH:mm')}
 
 =================
 Detail pesanan:
-${productDetail()}
+${msgProductDetail}
 =================
 Detail biaya :
 Total tagihan : Rp${subTotalMinusDiscount},-

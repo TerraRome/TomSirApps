@@ -124,7 +124,7 @@ export default function DetailHistory() {
         </View>
       ),
     })
-  }, [navigation])
+  }, [navigation, item])
 
   return (
     <View style={styles.container}>

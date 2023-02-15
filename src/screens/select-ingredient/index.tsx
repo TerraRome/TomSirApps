@@ -1,17 +1,17 @@
-import React, {useState, useEffect} from 'react'
-import {View, StyleSheet, TouchableOpacity, Image, FlatList, Alert} from 'react-native'
-import Modal from 'react-native-modal'
-import DropDownPicker from 'react-native-dropdown-picker'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import {useSelector, useDispatch} from 'react-redux'
-import {getIngredient, addIngredientItem, removeIngredientItem, changeIngredientItem} from '@store/actions/ingredient'
-import TextInput from '@components/TextInput'
-import Text from '@components/Text'
-import {theme} from '@utils/theme'
 import Button from '@components/Button'
-import {showErrorToast} from '@components/Toast'
+import Text from '@components/Text'
+import TextInput from '@components/TextInput'
+import { showErrorToast } from '@components/Toast'
+import { addIngredientItem, changeIngredientItem, getIngredient, removeIngredientItem } from '@store/actions/ingredient'
+import { theme } from '@utils/theme'
+import React, { useEffect, useState } from 'react'
+import { Alert, FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import DropDownPicker from 'react-native-dropdown-picker'
+import Modal from 'react-native-modal'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import { useDispatch, useSelector } from 'react-redux'
 
-const SelectIngredient = ({navigation}: any) => {
+const SelectIngredient = ({ navigation }: any) => {
   const dispatch = useDispatch()
   const [ingredientQty, setIngredientQty] = useState('')
   const [isEdit, setIsEdit] = useState(false)
@@ -19,14 +19,14 @@ const SelectIngredient = ({navigation}: any) => {
   const [ingredientItem, setIngredientItem] = useState('')
   const [isModalVisible, setModalVisible] = useState(false)
   const [isDropdowVisible, setDropdownVisible] = useState(false)
-  const {rows, dataIngredient} = useSelector((state: any) => state.ingredient)
+  const { rows, dataIngredient } = useSelector((state: any) => state.ingredient)
 
   useEffect(() => {
     dispatch(getIngredient())
   }, [])
 
   const convertData = (data: any) => {
-    const newData = data.map(({id, name, unit}: any) => {
+    const newData = data.map(({ id, name, unit }: any) => {
       return {
         label: name,
         value: `${id},${name},${unit}`,
@@ -39,7 +39,7 @@ const SelectIngredient = ({navigation}: any) => {
     const qty = Number(ingredientQty)
 
     const ingredient = ingredientItem.split(',')
-    const data = {id: ingredient[0], name: ingredient[1], unit: ingredient[2], qty}
+    const data = { id: ingredient[0], name: ingredient[1], unit: ingredient[2], qty }
     if (isEdit) {
       dispatch(changeIngredientItem(data))
     } else {
@@ -163,7 +163,7 @@ const SelectIngredient = ({navigation}: any) => {
     </View>
   )
 
-  const renderItem = ({item}: {item: any}) => {
+  const renderItem = ({ item }: { item: any }) => {
     return (
       <View style={styles.productList}>
         <Text size={9} type="regular">
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   buttonNew: {
     borderColor: theme.colors.primary,
     borderWidth: 1,
-    width: 120,
+    width: 150,
     borderRadius: 6,
     paddingVertical: 9,
     alignItems: 'center',

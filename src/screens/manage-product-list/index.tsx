@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { View, StyleSheet, TextInput, TouchableOpacity, FlatList, RefreshControl, Image } from 'react-native'
-import { useIsFocused } from '@react-navigation/native'
-import { useNavigation } from '@react-navigation/native'
-import { useSelector, useDispatch } from 'react-redux'
-import { getProducts } from 'services/products'
-import { setProducts } from 'store/actions/products'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import { getPriceProduct } from '@services/price-product'
-import { setIngredientItem } from 'store/actions/ingredient'
-import { theme } from '@utils/theme'
-import Text from '@components/Text'
 import CustomButton from '@components/Button'
+import Text from '@components/Text'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
+import { getPriceProduct } from '@services/price-product'
 import { convertToRupiah } from '@utils/convertRupiah'
+import { theme } from '@utils/theme'
+import React, { useCallback, useEffect, useState } from 'react'
+import { FlatList, Image, RefreshControl, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import { useDispatch, useSelector } from 'react-redux'
+import { getProducts } from 'services/products'
+import { setIngredientItem } from 'store/actions/ingredient'
+import { setProducts } from 'store/actions/products'
 
 interface Product {
   id: string
@@ -38,7 +37,7 @@ const ManageProductList: React.FC = () => {
 
   const [queryParams, setParams] = useState({
     page: 1,
-    limit: 10,
+    limit: 100,
     sortBy: 'name',
     order: 'ASC',
     merchant_id: user.merchant.id,

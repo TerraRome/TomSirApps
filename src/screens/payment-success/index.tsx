@@ -58,7 +58,7 @@ export default function PaymenSuccess() {
       } else {
         await printCheff({ ...item, merchant })
       }
-    } catch (error) {
+    } catch (error: any) {
       dispatch(setPrinter(null))
       showErrorToast(error?.message || 'Failed, please connect or turn on printer')
     } finally {
