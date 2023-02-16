@@ -1,5 +1,6 @@
 import moment from 'moment'
 import {Linking} from 'react-native'
+import store from 'store/store'
 import calculateCart from './calculateCart'
 import {convertToRupiah} from './convertRupiah'
 
@@ -7,13 +8,15 @@ export const whatsappBill = (item: any) => {
   let phoneWithCountryCode = `+62` + item?.whatsapp
   let message = messageBill(item)
 
-  console.log(item)
-  console.log(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
+  // console.log(item)
+  // console.log(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
 
   Linking.openURL(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
 }
 
 const messageBill = (item: any) => {
+  let merchant = store.getState().auth.merchant
+
   let carts =
     item?.transaction_product?.map((e: any) => ({
       cartId: e?.id,
@@ -61,13 +64,9 @@ Total: Rp${convertToRupiah(discountPrice)}
     return message.join('')
   }
 
-  let msgProductDetail = productDetail()
-
-  console.log(msgProductDetail)
-
-  let msg = `FAKTUR ELEKTRONIK
-Dr.Clean laundry
-Raya Darmo Baru Barat no 54
+  let msg = `NOTA ELEKTRONIK
+${merchant.name}
+${merchant.address}
 ${item?.whatsapp}
 
 Pelanggan Yth,
@@ -81,7 +80,7 @@ ${moment(item?.createdAt).format('DD MMM YYYY HH:mm')}
 
 =================
 Detail pesanan:
-${msgProductDetail}
+${productDetail()}
 =================
 Detail biaya :
 Total tagihan : Rp${subTotalMinusDiscount},-
@@ -94,7 +93,9 @@ ${
     : ''
 }
 
-Status: Lunas`
+Status: Lunas
+
+"CHAT NOTA INI ADALAH SEBAGAI TANDA PEMBELIAN YANG SAH"`
 
   return msg
 }
