@@ -1,35 +1,34 @@
-import React, { useLayoutEffect, useEffect, useState, useCallback } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import {
-  TouchableOpacity,
-  StyleSheet,
-  View,
+  Alert,
   Image,
+  TextInput as PureTextInput,
   ScrollView,
   StatusBar,
-  TextInput as PureTextInput,
-  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native'
 
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import Ionicons from 'react-native-vector-icons/Ionicons'
-import Entypo from 'react-native-vector-icons/Entypo'
-import { useSelector, useDispatch } from 'react-redux'
 import { theme } from '@utils/theme'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import Entypo from 'react-native-vector-icons/Entypo'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import { useDispatch } from 'react-redux'
 
-import WrapFooterButton from '@components/WrapFooterButton'
 import BackButton from '@components/BackButton'
 import Button from '@components/Button'
 import Text from '@components/Text'
-import { useNavigation, useRoute } from '@react-navigation/native'
-import { changeCartItem, removeCartItem } from 'store/actions/carts'
-import TextInput from 'components/TextInput'
-import { convertToAngka, convertToRupiah } from 'utils/convertRupiah'
-import { getProduct } from 'services/products'
-import { getPriceProduct } from '@services/price-product'
-import { showErrorToast } from 'components/Toast'
+import WrapFooterButton from '@components/WrapFooterButton'
 import CheckBox from '@react-native-community/checkbox'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { getPriceProduct } from '@services/price-product'
+import TextInput from 'components/TextInput'
+import { showErrorToast } from 'components/Toast'
+import { getProduct } from 'services/products'
+import { changeCartItem, removeCartItem } from 'store/actions/carts'
+import { convertToRupiah } from 'utils/convertRupiah'
 //@ts-ignore
 import { RadioButtonInput } from 'react-native-simple-radio-button'
 
@@ -74,7 +73,7 @@ export default function DetailProduct() {
         data: { data },
       } = await getProduct(item.id)
       setProduct(data)
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
     } finally {
     }
@@ -213,7 +212,7 @@ export default function DetailProduct() {
               </Text>
             </View>
           )}
-          <Text color="#A0A0A0">{product?.description}</Text>
+          <Text color="#A0A0A0">{product?.description} : Stok {item?.stock}</Text>
         </View>
         <View style={{ padding: 16 }}>
           <View>
@@ -376,6 +375,9 @@ export default function DetailProduct() {
             </View>
             <TouchableOpacity
               onPress={() => {
+                if (item?.stock == state.qty) {
+                  return
+                }
                 setState({ ...state, qty: parseInt(state.qty) + 1 })
               }}
               style={styles.buttonQty}>
