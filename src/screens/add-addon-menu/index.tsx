@@ -1,15 +1,15 @@
-import React, {useState} from 'react'
-import {View, StyleSheet, Alert} from 'react-native'
-import CheckBox from '@react-native-community/checkbox'
-import Text from '@components/Text'
-import {moneyFormat, convertToAngka} from '@utils/convertRupiah'
-import {theme} from '@utils/theme'
-import TextInput from '@components/TextInput'
 import CustomButton from '@components/Button'
-import {showErrorToast, showSuccessToast} from 'components/Toast'
-import {addAddonMenu, deleteAddonMenu, editAddonMenu} from '@services/addon'
+import Text from '@components/Text'
+import TextInput from '@components/TextInput'
+import CheckBox from '@react-native-community/checkbox'
+import { addAddonMenu, deleteAddonMenu, editAddonMenu } from '@services/addon'
+import { convertToAngka, moneyFormat } from '@utils/convertRupiah'
+import { theme } from '@utils/theme'
+import { showErrorToast, showSuccessToast } from 'components/Toast'
+import React, { useState } from 'react'
+import { Alert, StyleSheet, View } from 'react-native'
 
-const AddAddonMenu = ({navigation, route}: any) => {
+const AddAddonMenu = ({ navigation, route }: any) => {
   const isEdit = route?.params?.isEdit || false
   const id = route?.params?.id || ''
 
@@ -27,7 +27,7 @@ const AddAddonMenu = ({navigation, route}: any) => {
   }
 
   const onSave = async () => {
-    const {name, price, isActive} = addonMenu
+    const { name, price, isActive } = addonMenu
 
     const payload = {
       name: name,
@@ -107,7 +107,7 @@ const AddAddonMenu = ({navigation, route}: any) => {
       <View style={styles.checkboxContainer}>
         <CheckBox
           disabled={false}
-          tintColors={{true: theme.colors.primary}}
+          tintColors={{ true: theme.colors.primary }}
           onTintColor={theme.colors.grey2}
           onFillColor={theme.colors.grey2}
           onCheckColor={theme.colors.white}

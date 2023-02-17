@@ -18,7 +18,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { useDispatch, useSelector } from 'react-redux'
 import { getCategory } from 'store/actions/category'
-import { getTypeOrder } from 'store/actions/typeorder'
+// import { getTypeOrder } from 'store/actions/typeorder'
 
 const options: any = {
   quality: 0.4,
@@ -63,7 +63,7 @@ const AddProduct = ({ route }: any) => {
 
   useEffect(() => {
     dispatch(getCategory())
-    dispatch(getTypeOrder())
+    // dispatch(getTypeOrder())
     // if (isPriceEdit) {
     //   changeOrderType();
     // }

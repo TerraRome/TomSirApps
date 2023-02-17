@@ -1,10 +1,11 @@
+import Axios from '@utils/Axios'
 import {AxiosResponse} from 'axios'
 import qs from 'query-string'
-import Axios from '@utils/Axios'
 
 interface TypeOrder {
   name: string
   status: boolean
+  price: number
   merchant_id: string
 }
 
@@ -28,7 +29,10 @@ export const getStatusTypeOrders = async (params: {
   return await Axios.get(`api/v1/type-order/search?${qs.stringify(params)}`)
 }
 
-export const editTypeOrder = async (id: string, data: TypeOrder): Promise<AxiosResponse> => {
+export const editTypeOrder = async (
+  id: string,
+  data: TypeOrder,
+): Promise<AxiosResponse> => {
   return await Axios.put(`api/v1/type-order/${id}`, data)
 }
 

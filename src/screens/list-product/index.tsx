@@ -185,10 +185,12 @@ export default function Home() {
       if (result.status === 200) {
         const product = result.data.data;
         onPressAddToCart(product);
-        showSuccessToast('Data produk berhasil diubah')
+        showSuccessToast('Data produk berhasil ditambah')
         setModalTransaction(false)
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.log(error);
+
       showErrorToast(error.message)
     } finally {
       setProduct({ ...product, name: '', price: 0, category_id: '', categoryName: '' })

@@ -1,17 +1,16 @@
-import React, { useState } from 'react'
-import { Platform, StyleSheet, KeyboardAvoidingView, View, ScrollView } from 'react-native'
-import Text from '@components/Text'
 import Button from '@components/Button'
+import Text from '@components/Text'
+import TextInput from '@components/TextInput'
 import { showErrorToast } from '@components/Toast'
-import { useDispatch } from 'react-redux'
+import { setAuth } from '@store/actions/auth'
 import { theme } from '@utils/theme'
 import { emailValidator, passwordValidator } from '@utils/validators'
-import { setAuth } from '@store/actions/auth'
-import TextInput from '@components/TextInput'
 import Logo from 'components/Logo'
+import React, { useState } from 'react'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { useDispatch } from 'react-redux'
 import { signin } from 'services/auth'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 
 export default function Login({ navigation }: any) {
   const dispatch = useDispatch()
@@ -53,9 +52,6 @@ export default function Login({ navigation }: any) {
           keyboardVerticalOffset={20}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <Logo source={require('@assets/images/logo2.png')} style={styles.logo} />
-          <Text style={styles.title} type="bold" size={14}>
-            TomSir
-          </Text>
           <Text style={[styles.title, { marginBottom: 32 }]}>Silahkan masuk</Text>
           <TextInput
             value={email.value}

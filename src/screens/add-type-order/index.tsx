@@ -1,18 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { View, Switch, SafeAreaView, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from 'react-native'
-import FormData from 'form-data'
-import { launchImageLibrary } from 'react-native-image-picker'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import Ionicons from 'react-native-vector-icons/Ionicons'
-import { useNavigation } from '@react-navigation/native'
-import { addTypeOrder, editTypeOrder, deleteTypeOrder } from '@services/typeorder'
-import { showErrorToast, showSuccessToast } from 'components/Toast'
-import { useSelector, useDispatch } from 'react-redux'
-import { theme } from '@utils/theme'
-import Text from '@components/Text'
 import Button from '@components/Button'
-import Modalize from '@components/Modalize'
+import Text from '@components/Text'
 import TextInput from '@components/TextInput'
+import { useNavigation } from '@react-navigation/native'
+import { addTypeOrder, deleteTypeOrder, editTypeOrder } from '@services/typeorder'
+import { theme } from '@utils/theme'
+import { showErrorToast, showSuccessToast } from 'components/Toast'
+import React, { useRef, useState } from 'react'
+import { Alert, SafeAreaView, ScrollView, StyleSheet, Switch, View } from 'react-native'
+import { useSelector } from 'react-redux'
+import { convertToAngka, moneyFormat } from 'utils/convertRupiah'
 
 const options: any = {
   quality: 0.4,
@@ -24,11 +20,12 @@ const AddTypeOrder = ({ route }: any) => {
   const navigation = useNavigation()
   const id = route?.params?.id || ''
   const isEdit = route?.params?.isEdit
-  const {user} = useSelector((state: any) => state.auth)
+  const { user } = useSelector((state: any) => state.auth)
 
   const modalFilterRef: any = useRef()
   const [typeOrder, setTypeOrder] = useState<any>({
     name: route?.params?.name || '',
+    price: route?.params?.price.toString() || '',
     status: route?.params?.status || false,
   })
 
@@ -40,11 +37,12 @@ const AddTypeOrder = ({ route }: any) => {
   }
 
   const onCreateProduct = async () => {
-    const { name, status } = typeOrder
+    const { name, status, price } = typeOrder
 
     const payload = {
       name: name,
       status: status,
+      price: convertToAngka(price),
       merchant_id: user.merchant.id
     }
 
@@ -55,7 +53,7 @@ const AddTypeOrder = ({ route }: any) => {
           showSuccessToast('Data Tipe order berhasil diubah')
           navigation.navigate('ManageTypeOrder')
         }
-      } catch (error) {
+      } catch (error: any) {
         showErrorToast(error.message)
       }
     } else {
@@ -65,7 +63,7 @@ const AddTypeOrder = ({ route }: any) => {
           showSuccessToast('Data Tipe order berhasil ditambah')
           navigation.goBack()
         }
-      } catch (error) {
+      } catch (error: any) {
         showErrorToast(error.message)
       }
     }
@@ -88,7 +86,7 @@ const AddTypeOrder = ({ route }: any) => {
                 showSuccessToast('Data tipe order berhasil dihapus')
                 navigation.navigate('ManageTypeOrder')
               }
-            } catch ({ message }) {
+            } catch ({ message }: any) {
               showErrorToast(message)
             }
           },
@@ -104,12 +102,20 @@ const AddTypeOrder = ({ route }: any) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
-          <Text style={styles.inputTitle}>Nama Produk</Text>
+          <Text style={styles.inputTitle}>Nama Order</Text>
           <TextInput
             value={typeOrder.name}
-            placeholder="Masukkan nama produk"
+            placeholder="Masukkan nama order"
             onChangeText={onChange('name')}
             type="default"
+          />
+          <Text style={styles.inputTitle}>Harga Tambahan</Text>
+          <TextInput
+            value={moneyFormat(typeOrder.price)}
+            placeholder="Masukkan harga tambahan"
+            onChangeText={onChange('price')}
+            type="default"
+            isNumber
           />
           <Text style={styles.inputTitle}>Harge Jual per Tipe Pesanan</Text>
           <View style={styles.switchView}>
@@ -137,10 +143,10 @@ const AddTypeOrder = ({ route }: any) => {
             </Button>
           </View>
         ) : (
-            <Button mode="default" onPress={onCreateProduct} loading={!typeOrder.name}>
-              <Text style={styles.buttonText}>SIMPAN</Text>
-            </Button>
-          )}
+          <Button mode="default" onPress={onCreateProduct} loading={!typeOrder.name}>
+            <Text style={styles.buttonText}>SIMPAN</Text>
+          </Button>
+        )}
       </View>
     </SafeAreaView>
   )
@@ -163,8 +169,9 @@ const styles = StyleSheet.create({
   },
   inputTitle2: {
     color: 'grey',
-    fontSize: 14,
+    fontSize: 12,
     paddingLeft: 5,
+    flexWrap: 'wrap'
   },
   switchView: { flex: 1, flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, marginRight: 15 },
   photoWrapper: {

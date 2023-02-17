@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { View, StyleSheet, TextInput, TouchableOpacity, FlatList, RefreshControl, Image } from 'react-native'
-import { useIsFocused } from '@react-navigation/native'
-import { useNavigation } from '@react-navigation/native'
-import { useSelector, useDispatch } from 'react-redux'
+import CustomButton from '@components/Button'
+import Text from '@components/Text'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
 import { getTypeOrders } from '@services/typeorder'
 import { setTypeOrder } from '@store/actions/typeorder'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import { setIngredientItem } from 'store/actions/ingredient'
 import { theme } from '@utils/theme'
-import Text from '@components/Text'
-import CustomButton from '@components/Button'
-import { convertToRupiah } from '@utils/convertRupiah'
+import React, { useCallback, useEffect, useState } from 'react'
+import { FlatList, Image, RefreshControl, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import { useDispatch, useSelector } from 'react-redux'
+import { setIngredientItem } from 'store/actions/ingredient'
+import { moneyFormat } from 'utils/convertRupiah'
 
 interface TypeOrder {
   id: string
   name: string
   status: boolean
+  price: number
   merchant_id: string
   createdAt: Date
   updatedAt: Date
@@ -89,6 +89,7 @@ const TypeOrderList: React.FC = () => {
       isEdit: true,
       id: item?.id,
       name: item?.name,
+      price: item?.price,
       status: item?.status,
       merchant_id: user.merchant.id,
     })
@@ -98,7 +99,11 @@ const TypeOrderList: React.FC = () => {
     return (
       <TouchableOpacity style={styles.productList} onPress={onPressProduct(item)}>
         <Text>{item?.name}</Text>
-        <Text>{item?.status}</Text>
+        {item?.status == true ?
+          <Text>{'Rp ' + moneyFormat(item?.price.toString())}</Text>
+          :
+          <Text>Tidak digunakan</Text>
+        }
       </TouchableOpacity>
     )
   }

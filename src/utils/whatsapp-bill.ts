@@ -5,7 +5,7 @@ import calculateCart from './calculateCart'
 import {convertToRupiah} from './convertRupiah'
 
 export const whatsappBill = (item: any) => {
-  let phoneWithCountryCode = `+62` + item?.whatsapp
+  let phoneWithCountryCode = `62` + item?.whatsapp
   let message = messageBill(item)
 
   // console.log(item)

@@ -1,6 +1,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
-  Alert, FlatList, Image, Modal, ScrollView, StyleSheet, TextInput as PureTextInput, TouchableOpacity, View
+  Alert, FlatList, Image, Modal,
+  TextInput as PureTextInput,
+  ScrollView, StyleSheet,
+  TouchableOpacity, View
 } from 'react-native'
 
 import { theme } from '@utils/theme'
@@ -8,6 +11,7 @@ import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import { useDispatch, useSelector } from 'react-redux'
+
 
 import Button from '@components/Button'
 import Loader from '@components/Loader'
@@ -17,10 +21,11 @@ import WrapFooterButton from '@components/WrapFooterButton'
 //@ts-ignore
 import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native'
 import { showErrorToast } from 'components/Toast'
-import { deleteOrder, getOrderById, Order, order, updateOrder } from 'services/order'
+import { Order, deleteOrder, getOrderById, order, updateOrder } from 'services/order'
 import { setCarts } from 'store/actions/carts'
 import calculateCart from 'utils/calculateCart'
 import { convertToRupiah } from 'utils/convertRupiah'
+
 
 import { printBill } from '@utils/print-bill'
 import { printCheff } from '@utils/print-cheff'
@@ -47,20 +52,27 @@ export default function CheckOut() {
   const route: any = useRoute()
   const dispatch = useDispatch()
   const isFocused = useIsFocused()
+
   const modalSelectPrinter: any = useRef()
   const modalSelectTypePrint: any = useRef()
+  const modalFilterRef: any = useRef()
+
   const [item, setItem] = useState(route?.params?.item)
   const [isLoading, setLoading] = useState(false)
-  const [typeOrder, setTypeOrder] = useState(item?.type || 'dine_in')
+  const [typeOrder, setTypeOrder] = useState(item?.type || '')
+  const [priceOrder, setPriceOrder] = useState(0)
   const [tax, setTax] = useState(item?.tax_percentage || '')
   const [noteDineIn, setNoteDineIn] = useState(item?.note || '')
   const [phone_number, setPhone_number] = useState(item?.whatsapp || '')
   const [showModalSave, setModalSave] = useState(false)
   const [listPrinter, setListPrinter] = useState([])
   const [typePrint, setTypePrint] = useState<'bill' | 'cheff'>('bill')
+
   const printer = useSelector((state: any) => state.apps.printer)
   const merchant = useSelector((state: any) => state.auth?.user?.merchant)
   const cartsState = useSelector((state: any) => state.carts.data)
+  const typeOrderState = useSelector((state: any) => state.typeOrder.rows)
+
 
   const orderId = cartsState.find((e: any) => !!e.orderId)?.orderId || item?.id
   const isPendingOrder = Boolean(orderId)
@@ -91,7 +103,7 @@ export default function CheckOut() {
   // console.log(cartsState, 'cartsState')
 
   const calculate = calculateCart(carts)
-  const subTotalMinusDiscount = calculate.subtotal - calculate.discount
+  const subTotalMinusDiscount = calculate.subtotal - calculate.discount + priceOrder
   const subTotalPlusTax = (subTotalMinusDiscount * parseFloat(tax || '0')) / 100
   const total = subTotalMinusDiscount + subTotalPlusTax
 
@@ -104,7 +116,7 @@ export default function CheckOut() {
       products: carts.map((e: any) => ({
         id: e.id,
         qty: e.qty,
-        price: parseFloat(e.price),
+        price: parseFloat(e.price + priceOrder),
         note: e.note,
         addons: e?.addons?.length > 0 ? e.addons.map((a: any) => a.id) : [],
         transaction_product_id: e?.transaction_product_id,
@@ -251,6 +263,11 @@ export default function CheckOut() {
   useEffect(() => {
     if (isPendingOrder && isFocused) {
       getOrder()
+      {
+        typeOrderState.map((e: any) => {
+          if (e.name == typeOrder) setPriceOrder(e.price)
+        })
+      }
     }
   }, [isFocused])
 
@@ -284,7 +301,7 @@ export default function CheckOut() {
           <Text type="semibold" size={10} style={{ marginBottom: 16 }}>
             Tipe Order
           </Text>
-          <View style={styles.wrapSelectTypeOrder}>
+          {/* <View style={styles.wrapSelectTypeOrder}>
             {TYPE_ORDER.map((e: any) => (
               <TouchableOpacity
                 activeOpacity={0.5}
@@ -302,7 +319,15 @@ export default function CheckOut() {
                 <Text color={e.id === typeOrder ? theme.colors.primary : theme.colors.grey}>{e.label}</Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </View> */}
+          <TouchableOpacity onPress={() => modalFilterRef?.current?.open()} style={styles.category}>
+            {typeOrder ? (
+              <Text>{typeOrder}</Text>
+            ) : (
+              <Text style={styles.placeholder}>Pilih Type Order</Text>
+            )}
+            <AntDesign name="right" size={20} color={theme.colors.blackSemiTransparent} />
+          </TouchableOpacity>
           {/* { Text Pelanggan Dihapus } */}
           <View style={styles.wrapTitle}>
             <Text type="semibold" size={10}>
@@ -339,7 +364,7 @@ export default function CheckOut() {
         </View>
         {carts.map((e: any) => {
           const totalPriceAddons = e.addons.reduce((acc: number, curr: any) => acc + parseFloat(curr.price), 0)
-          const totalRealPriceItem = parseFloat(e.price + totalPriceAddons) * e?.qty
+          const totalRealPriceItem = (parseFloat(e.price + totalPriceAddons) * e?.qty) + priceOrder
           const nominalDiscount = e?.is_disc_percentage ? (parseFloat(e?.price) * e?.disc) / 100 : parseFloat(e?.disc)
           const discountPrice = totalRealPriceItem - nominalDiscount * e?.qty
           const disabled = Boolean(!isPendingOrderChange && isPendingOrder)
@@ -488,6 +513,24 @@ export default function CheckOut() {
           </Button>
         </View>
       </WrapFooterButton>
+      <Modalize ref={modalFilterRef}>
+        <View style={styles.modalContentWrapper}>
+          {typeOrderState.map((e: any) => (
+            e.status == 1 ? <TouchableOpacity
+              key={e.id}
+              style={styles.modalContent}
+              onPress={() => {
+                setTypeOrder(e.name)
+                setPriceOrder(e.price)
+                modalFilterRef?.current?.close()
+              }}>
+              <Text type="semibold">{e.name}</Text>
+            </TouchableOpacity>
+              :
+              null
+          ))}
+        </View>
+      </Modalize>
       <Modal visible={showModalSave} animationType="slide" transparent statusBarTranslucent>
         <View
           style={{
@@ -626,6 +669,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
+  placeholder: {
+    color: theme.colors.grey,
+    fontSize: 12,
+    paddingLeft: 8,
+  },
   emptyImage: { width: wp(60), height: wp(50), marginTop: 32, resizeMode: 'contain' },
   checkoutButton: {
     justifyContent: 'space-between',
@@ -669,5 +717,25 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 0.5,
     borderBottomColor: 'lightgray',
+  },
+  category: {
+    width: '100%',
+    borderColor: theme.colors.defaultBorderColor,
+    borderWidth: 1,
+    marginVertical: 10,
+    borderRadius: 10,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  modalContent: {
+    paddingVertical: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'lightgray',
+  },
+  modalContentWrapper: {
+    padding: 16,
   },
 })
