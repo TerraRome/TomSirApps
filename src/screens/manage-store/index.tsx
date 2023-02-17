@@ -8,10 +8,10 @@ import Feather from 'react-native-vector-icons/Feather'
 import { useSelector } from 'react-redux'
 
 const storeMenu = [
-  // {
-  //   key: 'ManageCustomer',
-  //   title: 'Kelola Customer',
-  // },
+  {
+    key: 'ManageCustomer',
+    title: 'Kelola Customer',
+  },
   {
     key: 'ManageTypeOrder',
     title: 'Kelola Tipe Order',

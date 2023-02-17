@@ -51,6 +51,7 @@ export default function Home() {
   const navigation = useNavigation()
   const modalFilterRef: any = useRef()
   const modalFilterCategoryRef: any = useRef()
+
   const { user } = useSelector((state: any) => state.auth)
   const carts = useSelector((state: any) => state.carts.data)
   const order = useSelector((state: any) => state.order.rows)

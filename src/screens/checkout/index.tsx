@@ -34,6 +34,7 @@ import Modalize from '@components/Modalize'
 //@ts-ignore
 import { BluetoothManager } from 'react-native-bluetooth-escpos-printer'
 import { setPrinter } from 'store/actions/apps'
+import { getCustomer } from 'store/actions/customer'
 import { fetchBase64 } from 'utils/fetch-blob'
 
 const PAYMENT_TYPE = [
@@ -56,6 +57,7 @@ export default function CheckOut() {
   const modalSelectPrinter: any = useRef()
   const modalSelectTypePrint: any = useRef()
   const modalFilterRef: any = useRef()
+  const modalCustomerRef: any = useRef()
 
   const [item, setItem] = useState(route?.params?.item)
   const [isLoading, setLoading] = useState(false)
@@ -70,6 +72,7 @@ export default function CheckOut() {
 
   const printer = useSelector((state: any) => state.apps.printer)
   const merchant = useSelector((state: any) => state.auth?.user?.merchant)
+  const customer = useSelector((state: any) => state.customer.rows)
   const cartsState = useSelector((state: any) => state.carts.data)
   const typeOrderState = useSelector((state: any) => state.typeOrder.rows)
 
@@ -269,6 +272,8 @@ export default function CheckOut() {
         })
       }
     }
+    dispatch(getCustomer());
+
   }, [isFocused])
 
   useLayoutEffect(() => {
@@ -334,6 +339,10 @@ export default function CheckOut() {
               Pelanggan
             </Text>
           </View>
+          <TouchableOpacity onPress={() => modalCustomerRef?.current?.open()} style={styles.category}>
+            <Text style={styles.placeholder}>Pilih Customer</Text>
+            <AntDesign name="right" size={20} color={theme.colors.blackSemiTransparent} />
+          </TouchableOpacity>
           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around' }}>
             <TextInput
               style={{ height: 45, width: "50%" }}
@@ -346,7 +355,14 @@ export default function CheckOut() {
               style={{ height: 45, width: "45%", fontSize: 10 }}
               placeholder="Nomor Whatsapp"
               value={phone_number}
-              onChangeText={val => setPhone_number(val)}
+              onChangeText={val =>
+                customer.map((e: any) => {
+                  if (val == e.phone_number) {
+                    setNoteDineIn(e.name)
+                  }
+                  setPhone_number(val)
+                })
+              }
             />
           </View>
         </View>
@@ -531,6 +547,24 @@ export default function CheckOut() {
               null
           ))}
         </View>
+      </Modalize>
+      <Modalize ref={modalCustomerRef}>
+        <ScrollView>
+          <View style={styles.modalContentWrapper}>
+            {customer.map((e: any) => (
+              <TouchableOpacity
+                key={e.id}
+                style={styles.modalContent}
+                onPress={() => {
+                  setNoteDineIn(e.name)
+                  setPhone_number(e.phone_number)
+                  modalCustomerRef?.current?.close()
+                }}>
+                <Text type="semibold">{e.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
       </Modalize>
       <Modal visible={showModalSave} animationType="slide" transparent statusBarTranslucent>
         <View

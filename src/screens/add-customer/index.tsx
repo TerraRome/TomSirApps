@@ -1,14 +1,12 @@
-import React, { useState } from 'react'
-import { View, StyleSheet, Alert, TouchableOpacity } from 'react-native'
-import Text from '@components/Text'
-import { moneyFormat, convertToAngka } from '@utils/convertRupiah'
-import { useSelector, useDispatch } from 'react-redux'
-import { theme } from '@utils/theme'
-import TextInput from '@components/TextInput'
-import CustomButton from '@components/Button'
 import Button from '@components/Button'
+import Text from '@components/Text'
+import TextInput from '@components/TextInput'
+import { addCustomer, deleteCustomer, editCustomer } from '@services/customer'
+import { theme } from '@utils/theme'
 import { showErrorToast, showSuccessToast } from 'components/Toast'
-import { addCustomer, editCustomer, deleteCustomer } from '@services/customer'
+import React, { useState } from 'react'
+import { Alert, StyleSheet, View } from 'react-native'
+import { useSelector } from 'react-redux'
 
 const AddCustomer = ({ navigation, route }: any) => {
   const isEdit = route?.params?.isEdit || false
@@ -33,7 +31,7 @@ const AddCustomer = ({ navigation, route }: any) => {
 
     const payload = {
       name: name,
-      email: email,
+      // email: email,
       phone_number: phone_number,
       merchant_id: user.merchant.id
     }
@@ -82,7 +80,7 @@ const AddCustomer = ({ navigation, route }: any) => {
                 showSuccessToast('Data Pelanggan berhasil dihapus')
                 navigation.navigate('ManageCustomer')
               }
-            } catch ({ message }) {
+            } catch (message: any) {
               showErrorToast(message)
             }
           },
@@ -103,13 +101,13 @@ const AddCustomer = ({ navigation, route }: any) => {
         onChangeText={onChange('name')}
         type="default"
       />
-      <Text style={styles.inputTitle}>Email Pelanggan</Text>
+      {/* <Text style={styles.inputTitle}>Email Pelanggan</Text>
       <TextInput
         value={customer.email}
         placeholder="Email"
         onChangeText={onChange('email')}
         type="default"
-      />
+      /> */}
       <Text style={styles.inputTitle}>No. Pelanggan</Text>
       <TextInput
         value={customer.phone_number}
@@ -124,15 +122,15 @@ const AddCustomer = ({ navigation, route }: any) => {
             <Button mode="outlined" onPress={onDeleteCustomer} style={styles.buttonWidth}>
               <Text style={styles.buttonTextDelete}>HAPUS</Text>
             </Button>
-            <Button mode="default" onPress={onSave} loading={!customer.name || !customer.email || !customer.phone_number} style={styles.buttonWidth}>
+            <Button mode="default" onPress={onSave} loading={!customer.name || !customer.phone_number} style={styles.buttonWidth}>
               <Text style={styles.buttonText}>SIMPAN</Text>
             </Button>
           </View>
         ) : (
-            <Button mode="default" onPress={onSave} loading={!customer.name || !customer.email || !customer.phone_number}>
-              <Text style={styles.buttonText}>SIMPAN</Text>
-            </Button>
-          )}
+          <Button mode="default" onPress={onSave} loading={!customer.name || !customer.phone_number}>
+            <Text style={styles.buttonText}>SIMPAN</Text>
+          </Button>
+        )}
       </View>
     </View>
   )

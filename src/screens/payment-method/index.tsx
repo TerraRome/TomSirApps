@@ -8,7 +8,8 @@ import { showErrorToast } from 'components/Toast'
 import React, { useState } from 'react'
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native'
 import { RFValue as fs } from 'react-native-responsive-fontsize'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { Customer, addCustomer } from 'services/customer'
 import { Order, OrderPay, order, payOrder } from 'services/order'
 import { setCarts } from 'store/actions/carts'
 import { convertToRupiah } from 'utils/convertRupiah'
@@ -20,6 +21,7 @@ export default function PaymentMethod() {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const route: any = useRoute()
+  const merchant = useSelector((state: any) => state.auth?.user?.merchant)
   const { carts, typeOrder, priceOrder, tax, noteDineIn, subTotalPlusTax, total, orderId, phone_number } = route?.params?.item
   const [totalPay, setTotalPay] = useState('')
   const [isLoading, setLoading] = useState(false)
@@ -52,14 +54,22 @@ export default function PaymentMethod() {
       ...payParam,
       id: undefined,
     }
+
+    const customerParam: Customer = {
+      merchant_id: merchant.id,
+      name: noteDineIn,
+      // email: 'kosong',
+      phone_number: phone_number,
+    }
     // console.log(param)
     setLoading(true)
     try {
+      await addCustomer(customerParam)
       const {
         data: { data },
       }: any = orderId ? await payOrder(payParam) : await order(param)
-      navigation.navigate('PaymentSuccess', { item: data, priceOrder: priceOrder })
       dispatch(setCarts([]))
+      navigation.navigate('PaymentSuccess', { item: data, priceOrder: priceOrder })
     } catch (error: any) {
       showErrorToast(error.message)
     } finally {

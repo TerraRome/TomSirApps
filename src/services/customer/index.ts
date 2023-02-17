@@ -1,10 +1,10 @@
+import Axios from '@utils/Axios'
 import {AxiosResponse} from 'axios'
 import qs from 'query-string'
-import Axios from '@utils/Axios'
 
-interface Customer {
+export interface Customer {
   name: string
-  email: string
+  // email: string
   phone_number: string
   merchant_id: string
 }
@@ -23,7 +23,10 @@ export const getCustomers = async (params: {
   return await Axios.get(`api/v1/customer?${qs.stringify(params)}`)
 }
 
-export const editCustomer = async (id: string, data: Customer): Promise<AxiosResponse> => {
+export const editCustomer = async (
+  id: string,
+  data: Customer,
+): Promise<AxiosResponse> => {
   return await Axios.put(`api/v1/customer/${id}`, data)
 }
 
