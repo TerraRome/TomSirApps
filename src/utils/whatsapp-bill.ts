@@ -4,9 +4,9 @@ import store from 'store/store'
 import calculateCart from './calculateCart'
 import {convertToRupiah} from './convertRupiah'
 
-export const whatsappBill = (item: any) => {
+export const whatsappBill = (item: any, priceOrder: any) => {
   let phoneWithCountryCode = `62` + item?.whatsapp
-  let message = messageBill(item)
+  let message = messageBill(item, priceOrder)
 
   // console.log(item)
   // console.log(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
@@ -14,7 +14,7 @@ export const whatsappBill = (item: any) => {
   Linking.openURL(`https://wa.me/${phoneWithCountryCode}?text=${message}`)
 }
 
-const messageBill = (item: any) => {
+const messageBill = (item: any, priceOrder: any) => {
   let merchant = store.getState().auth.merchant
 
   let carts =
@@ -37,7 +37,8 @@ const messageBill = (item: any) => {
     })) || []
 
   const calculate = calculateCart(carts)
-  const subTotalMinusDiscount = calculate.subtotal - calculate.discount
+  const subTotalMinusDiscount =
+    calculate.subtotal - calculate.discount + priceOrder
   const subTotalPlusTax = subTotalMinusDiscount + item.total_tax
   const total = subTotalMinusDiscount + subTotalPlusTax
 
@@ -47,15 +48,15 @@ const messageBill = (item: any) => {
         (acc: number, curr: any) => acc + parseFloat(curr.price),
         0,
       )
-      const totalRealPriceItem = parseFloat(e.price + totalPriceAddons) * e?.qty
+      const totalRealPriceItem =
+        parseFloat(e.price + totalPriceAddons) * e?.qty + priceOrder
       const nominalDiscount = e?.is_disc_percentage
         ? (parseFloat(e?.price) * e?.disc) / 100
         : parseFloat(e?.disc)
       const discountPrice = totalRealPriceItem - nominalDiscount * e?.qty
       const message = `✅ ${e?.qty} ${e?.name} @ Rp${convertToRupiah(
-        e?.product?.price,
+        discountPrice,
       )}
-Total: Rp${convertToRupiah(discountPrice)}
 `
 
       return message

@@ -31,11 +31,16 @@ export default function DetailHistory() {
   const isFocused = useIsFocused()
   const modalSelectPrinter: any = useRef()
   const modalFilterRef: any = useRef()
+
   const [item, setItem] = useState(route?.params?.item)
   const [isLoading, setLoading] = useState(false)
   const [listPrinter, setListPrinter] = useState([])
+  const [priceOrder, setPriceOrder] = useState(0)
+
   const printer = useSelector((state: any) => state.apps.printer)
   const merchant = useSelector((state: any) => state.auth?.user?.merchant)
+  const typeOrderState = useSelector((state: any) => state.typeOrder.rows)
+
 
   let carts =
     item?.transaction_product?.map((e: any) => ({
@@ -57,7 +62,7 @@ export default function DetailHistory() {
     })) || []
 
   const calculate = calculateCart(carts)
-  const subTotalMinusDiscount = calculate.subtotal - calculate.discount
+  const subTotalMinusDiscount = calculate.subtotal - calculate.discount + priceOrder
   const subTotalPlusTax = subTotalMinusDiscount + item.total_tax
   const total = subTotalMinusDiscount + subTotalPlusTax
 
@@ -99,6 +104,11 @@ export default function DetailHistory() {
 
   useEffect(() => {
     getOrder()
+    {
+      typeOrderState.map((e: any) => {
+        if (e.name == item?.type) setPriceOrder(e.price)
+      })
+    }
   }, [isFocused])
 
   useLayoutEffect(() => {
@@ -108,7 +118,7 @@ export default function DetailHistory() {
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity
             onPress={() => {
-              whatsappBill(item)
+              whatsappBill(item, priceOrder)
             }}
             style={{ marginRight: 18, flexDirection: 'row', alignItems: 'center' }}>
             <AntDesign name="sharealt" size={18} />
@@ -146,7 +156,7 @@ export default function DetailHistory() {
           </View>
           <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Tipe Order</Text>
-            <Text type="semibold">{item?.type === 'dine_in' ? 'Dine In' : 'Take Away'}</Text>
+            <Text type="semibold">{item?.type}</Text>
           </View>
           <View style={[styles.rowBetween, { marginVertical: 3 }]}>
             <Text>Metode Pembayaran</Text>
@@ -160,7 +170,7 @@ export default function DetailHistory() {
         </View>
         {carts.map((e: any) => {
           const totalPriceAddons = e.addons.reduce((acc: number, curr: any) => acc + parseFloat(curr.price), 0)
-          const totalRealPriceItem = parseFloat(e.price + totalPriceAddons) * e?.qty
+          const totalRealPriceItem = parseFloat(e.price + totalPriceAddons) * e?.qty + priceOrder
           const nominalDiscount = e?.is_disc_percentage ? (parseFloat(e?.price) * e?.disc) / 100 : parseFloat(e?.disc)
           const discountPrice = totalRealPriceItem - nominalDiscount * e?.qty
           return (

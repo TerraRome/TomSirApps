@@ -25,6 +25,7 @@ export default function PaymenSuccess() {
   const dispatch = useDispatch()
   const route: any = useRoute()
   const item = route?.params?.item
+  const priceOrder = route?.params?.priceOrder
   const insets = useSafeAreaInsets()
   const mounted: any = useRef()
   const modalFilterRef: any = useRef()
@@ -97,7 +98,7 @@ export default function PaymenSuccess() {
       <Button
         style={{ marginLeft: 8 }}
         loading={isLoading}
-        onPress={() => whatsappBill(item)}
+        onPress={() => whatsappBill(item, priceOrder)}
         mode="outlined">
         <Text type="semibold" size={7}>
           {isLoading ? 'MENCETAK...' : 'CETAK WHATSAPP'}

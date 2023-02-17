@@ -20,13 +20,13 @@ export default function PaymentMethod() {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const route: any = useRoute()
-  const { carts, typeOrder, tax, noteDineIn, subTotalPlusTax, total, orderId, phone_number } = route?.params?.item
+  const { carts, typeOrder, priceOrder, tax, noteDineIn, subTotalPlusTax, total, orderId, phone_number } = route?.params?.item
   const [totalPay, setTotalPay] = useState('')
   const [isLoading, setLoading] = useState(false)
   const [resMidtrans, setResMidtrans] = useState('')
 
   const handleSubmit = async (total_pay: string) => {
-    console.log(route?.params?.item);
+    // console.log(carts);
 
     const payParam: OrderPay = {
       id: orderId,
@@ -44,7 +44,7 @@ export default function PaymentMethod() {
       products: carts.map((e: any) => ({
         id: e.id,
         qty: e.qty,
-        price: parseFloat(e.price),
+        price: parseFloat(e.price + priceOrder),
         note: e.note,
         addons: e?.addons?.length > 0 ? e.addons.map((a: any) => a.id) : [],
       })),
@@ -58,7 +58,7 @@ export default function PaymentMethod() {
       const {
         data: { data },
       }: any = orderId ? await payOrder(payParam) : await order(param)
-      navigation.navigate('PaymentSuccess', { item: data })
+      navigation.navigate('PaymentSuccess', { item: data, priceOrder: priceOrder })
       dispatch(setCarts([]))
     } catch (error: any) {
       showErrorToast(error.message)

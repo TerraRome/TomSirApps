@@ -38,7 +38,9 @@ import { setProducts } from '@store/actions/products'
 import { setTypeOrder } from '@store/actions/typeorder'
 import { convertToAngka, moneyFormat } from '@utils/convertRupiah'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { getOrderList } from 'services/order'
 import { changeCartItem } from 'store/actions/carts'
+import { setOrders } from 'store/actions/order'
 import calculateCart from 'utils/calculateCart'
 import Card from './product-card'
 
@@ -118,7 +120,7 @@ export default function Home() {
           data: { data },
         } = await getProducts({ ...queryParams, ...params })
         dispatch(setProducts(data))
-      } catch (error) {
+      } catch (error: any) {
         showErrorToast(error.message)
       } finally {
         setLoading(false)
@@ -224,6 +226,33 @@ export default function Home() {
     }, 400)
     setParams({ ...queryParams, search })
   }
+
+  const [queryParamsOrderList, setParamsOrderList] = useState({
+    // page: 1,
+    // limit: 20,
+    sortBy: 'createdAt',
+    order: 'ASC',
+    status: 'hold',
+    merchant_id: user.merchant.id,
+    search: undefined,
+  })
+
+  const getDataOrderList = useCallback(
+    async (params?: any) => {
+      setLoading(true)
+      try {
+        const {
+          data: { data },
+        } = await getOrderList({ ...queryParamsOrderList, ...params })
+        dispatch(setOrders(data))
+      } catch (error: any) {
+        showErrorToast(error.message)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [queryParams],
+  )
 
   useEffect(() => {
     dispatch(getCategory())

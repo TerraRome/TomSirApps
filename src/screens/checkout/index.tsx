@@ -477,17 +477,17 @@ export default function CheckOut() {
         <View style={styles.rowBetween}>
           {!isPendingOrder || isPendingOrderChange ? (
             <Button
-              loading={noteDineIn == '' || phone_number == '' || isLoading}
+              loading={noteDineIn == '' || phone_number == '' || typeOrder == '' || isLoading}
               style={{ flex: 1, marginRight: 18, paddingHorizontal: 0, alignItems: 'center' }}
               mode="outlined"
               onPress={handleSaveChange}>
-              <Text type="bold" color={noteDineIn == '' || phone_number == '' ? theme.colors.disabled : theme.colors.primary}>
+              <Text type="bold" color={noteDineIn == '' || phone_number == '' || typeOrder == '' ? theme.colors.disabled : theme.colors.primary}>
                 Simpan Pesanan
               </Text>
             </Button>
           ) : null}
           <Button
-            loading={noteDineIn == '' || phone_number == '' || isLoading}
+            loading={noteDineIn == '' || phone_number == '' || typeOrder == '' || isLoading}
             style={{ flex: 1, paddingHorizontal: 0, alignItems: 'center' }}
             onPress={async () => {
               if (isPendingOrderChange) {
@@ -497,6 +497,7 @@ export default function CheckOut() {
                 item: {
                   carts,
                   typeOrder,
+                  priceOrder,
                   tax,
                   noteDineIn,
                   subTotalMinusDiscount,

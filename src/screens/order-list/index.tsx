@@ -28,8 +28,8 @@ const OrderList = ({ navigation }: any) => {
   const [isLoading, setLoading] = useState(false)
 
   const [queryParams, setParams] = useState({
-    page: 1,
-    limit: 20,
+    // page: 1,
+    // limit: 20,
     sortBy: 'createdAt',
     order: 'ASC',
     status: 'hold',
@@ -37,10 +37,8 @@ const OrderList = ({ navigation }: any) => {
     search: undefined,
   })
 
-  const getData = useCallback(
+  const getDataOrderList = useCallback(
     async (params?: any) => {
-      // console.log(merchant.id);
-
       setLoading(true)
       try {
         if (!queryParams?.search) {
@@ -62,17 +60,17 @@ const OrderList = ({ navigation }: any) => {
     [queryParams],
   )
 
-  const getNextPage = () => {
-    const hasNextPage = Boolean(page_size === queryParams.limit)
-    const nextPage = current_page + 1
-    if (isLoading || !hasNextPage) {
-      return
-    }
-    getData({ page: nextPage })
-  }
+  // const getNextPage = () => {
+  //   const hasNextPage = Boolean(page_size === queryParams.limit)
+  //   const nextPage = current_page + 1
+  //   if (isLoading || !hasNextPage) {
+  //     return
+  //   }
+  //   getDataOrderList({ page: nextPage })
+  // }
 
   const refreshData = (param?: any) => {
-    getData({ page: 1, ...param })
+    getDataOrderList({ page: 1, ...param })
   }
 
   const handleSearch = (search: any) => {
@@ -154,7 +152,7 @@ const OrderList = ({ navigation }: any) => {
           data={rows}
           keyExtractor={(item: any) => item.id.toString()}
           renderItem={renderItem}
-          onEndReached={getNextPage}
+          // onEndReached={getNextPage}
           onEndReachedThreshold={1}
           ItemSeparatorComponent={renderDivider}
           ListFooterComponent={() => <Footer loading={false} />}

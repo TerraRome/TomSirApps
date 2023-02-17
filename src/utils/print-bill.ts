@@ -78,12 +78,7 @@ export const printBill = (item: any) => {
       await BluetoothEscposPrinter.printerAlign(
         BluetoothEscposPrinter.ALIGN.CENTER,
       )
-      const type =
-        item.type === 'dine_in'
-          ? 'Dine in'
-          : item.type === 'take_away'
-          ? 'Take away'
-          : item.type
+      const type = item.type
       await BluetoothEscposPrinter.printText(type + '\n', options)
       if (item?.note && item.status !== 'hold') {
         await BluetoothEscposPrinter.printText(item.note + '\n', options)
