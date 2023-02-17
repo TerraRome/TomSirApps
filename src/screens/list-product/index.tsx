@@ -103,7 +103,7 @@ export default function Home() {
 
   const [isSearching, setIsSearching] = useState(false)
   const [showModalTransaction, setModalTransaction] = useState(false)
-  const calculate = calculateCart(carts)
+  const calculate = calculateCart(carts, 0)
   const subTotalMinusDiscount = calculate.subtotal - calculate.discount
   const selectedCategory = category.find((e: any) => e.id === queryParams.category_id)
 

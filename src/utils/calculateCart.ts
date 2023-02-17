@@ -1,10 +1,11 @@
-const calculateCart = (carts: any[]) => {
+const calculateCart = (carts: any[], priceOrder: any) => {
   const defaults = {
     qty: 0,
     subtotal: 0,
     discount: 0,
     discountNominal: 0,
     totalAddons: 0,
+    additionalPrice: 0,
   }
   if (!carts) {
     return defaults
@@ -23,7 +24,8 @@ const calculateCart = (carts: any[]) => {
       discountNominal: discountNominal + acc.discountNominal,
       totalAddons: totalAddons + acc.totalAddons,
       subtotal:
-        (parseFloat(curr.price) + totalAddons) * curr.qty + acc.subtotal,
+        (parseFloat(curr.price) + totalAddons + priceOrder) * curr.qty +
+        acc.subtotal,
     }
   }, defaults)
 }

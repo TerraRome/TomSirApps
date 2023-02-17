@@ -62,6 +62,7 @@ export default function PaymentMethod() {
       phone_number: phone_number,
     }
     // console.log(param)
+    // return
     setLoading(true)
     try {
       await addCustomer(customerParam)

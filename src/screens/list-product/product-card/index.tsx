@@ -1,15 +1,15 @@
-import React, { useRef, useEffect } from 'react'
-import { TouchableOpacity, StyleSheet, Dimensions, View, Image } from 'react-native'
-import Ionicons from 'react-native-vector-icons/Ionicons'
-import { theme } from '@utils/theme'
-import Text from '@components/Text'
-import { convertToRupiah } from 'utils/convertRupiah'
-import Modalize from 'components/Modalize'
-import WrapFooterButton from '@components/WrapFooterButton'
 import Button from '@components/Button'
+import Text from '@components/Text'
+import WrapFooterButton from '@components/WrapFooterButton'
 import { useNavigation } from '@react-navigation/native'
-import calculateCart from 'utils/calculateCart'
+import { theme } from '@utils/theme'
+import Modalize from 'components/Modalize'
 import { showErrorToast } from 'components/Toast'
+import React, { useRef } from 'react'
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import calculateCart from 'utils/calculateCart'
+import { convertToRupiah } from 'utils/convertRupiah'
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
 export default function Card({ item, index, carts = [], onPress, numColumns = 3 }: any) {
@@ -19,7 +19,7 @@ export default function Card({ item, index, carts = [], onPress, numColumns = 3 
   const cartRelated = carts?.length > 0 && carts?.filter((e: any) => e.id === item.id)
   const discountNominal = item?.is_disc_percentage ? (parseFloat(item?.price) * item?.disc) / 100 : item?.disc
   const discountPrice = item.price - discountNominal
-  const calculate = calculateCart(cartRelated)
+  const calculate = calculateCart(cartRelated, 0)
 
   return (
     <React.Fragment key={item.id}>
@@ -57,19 +57,19 @@ export default function Card({ item, index, carts = [], onPress, numColumns = 3 
             <Ionicons name="ios-image-outline" size={25} color={theme.colors.grey} />
           </View>
         ) : (
-            <Image
-              source={{
-                uri: item.image,
-              }}
-              style={[
-                styles.image,
-                {
-                  maxWidth: SCREEN_WIDTH / (numColumns + 0.3),
-                  height: SCREEN_WIDTH / (numColumns + 0.3),
-                },
-              ]}
-            />
-          )}
+          <Image
+            source={{
+              uri: item.image,
+            }}
+            style={[
+              styles.image,
+              {
+                maxWidth: SCREEN_WIDTH / (numColumns + 0.3),
+                height: SCREEN_WIDTH / (numColumns + 0.3),
+              },
+            ]}
+          />
+        )}
         <View style={{ flexDirection: 'row' }}>
           {cartRelated?.length > 0 && (
             <Text size={7} color={theme.colors.primary} style={{ marginRight: 6 }}>
@@ -84,7 +84,7 @@ export default function Card({ item, index, carts = [], onPress, numColumns = 3 
             {item.name}
           </Text>
         </View>
-        <View style={{flexDirection: 'row'}}>
+        <View style={{ flexDirection: 'row' }}>
           <Text size={5} type="semibold">
             {convertToRupiah(discountPrice)}{' '}
           </Text>

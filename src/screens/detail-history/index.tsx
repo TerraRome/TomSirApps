@@ -61,8 +61,8 @@ export default function DetailHistory() {
       is_disc_percentage: e.product.is_disc_percentage,
     })) || []
 
-  const calculate = calculateCart(carts)
-  const subTotalMinusDiscount = calculate.subtotal - calculate.discount + priceOrder
+  const calculate = calculateCart(carts, priceOrder)
+  const subTotalMinusDiscount = calculate.subtotal - calculate.discount
   const subTotalPlusTax = subTotalMinusDiscount + item.total_tax
   const total = subTotalMinusDiscount + subTotalPlusTax
 
@@ -170,7 +170,7 @@ export default function DetailHistory() {
         </View>
         {carts.map((e: any) => {
           const totalPriceAddons = e.addons.reduce((acc: number, curr: any) => acc + parseFloat(curr.price), 0)
-          const totalRealPriceItem = parseFloat(e.price + totalPriceAddons) * e?.qty + priceOrder
+          const totalRealPriceItem = parseFloat(e.price + totalPriceAddons + priceOrder) * e?.qty
           const nominalDiscount = e?.is_disc_percentage ? (parseFloat(e?.price) * e?.disc) / 100 : parseFloat(e?.disc)
           const discountPrice = totalRealPriceItem - nominalDiscount * e?.qty
           return (

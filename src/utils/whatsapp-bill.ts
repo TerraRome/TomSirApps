@@ -36,9 +36,8 @@ const messageBill = (item: any, priceOrder: any) => {
       is_disc_percentage: e.product.is_disc_percentage,
     })) || []
 
-  const calculate = calculateCart(carts)
-  const subTotalMinusDiscount =
-    calculate.subtotal - calculate.discount + priceOrder
+  const calculate = calculateCart(carts, priceOrder)
+  const subTotalMinusDiscount = calculate.subtotal - calculate.discount
   const subTotalPlusTax = subTotalMinusDiscount + item.total_tax
   const total = subTotalMinusDiscount + subTotalPlusTax
 
@@ -49,7 +48,7 @@ const messageBill = (item: any, priceOrder: any) => {
         0,
       )
       const totalRealPriceItem =
-        parseFloat(e.price + totalPriceAddons) * e?.qty + priceOrder
+        parseFloat(e.price + totalPriceAddons + priceOrder) * e?.qty
       const nominalDiscount = e?.is_disc_percentage
         ? (parseFloat(e?.price) * e?.disc) / 100
         : parseFloat(e?.disc)
@@ -84,7 +83,7 @@ Detail pesanan:
 ${productDetail()}
 =================
 Detail biaya :
-Total tagihan : Rp${subTotalMinusDiscount},-
+Total tagihan : Rp${convertToRupiah(subTotalMinusDiscount)},-
 Pajak ${item?.tax_percentage}% : Rp${convertToRupiah(item?.total_tax)}
 Grand total : Rp${convertToRupiah(item?.total_price)},-
 💵 ${item?.payment_type}  : Rp${convertToRupiah(item?.total_pay)},-
