@@ -212,7 +212,7 @@ export default function DetailProduct() {
               </Text>
             </View>
           )}
-          <Text color="#A0A0A0">{product?.description} : Stok {item?.stock}</Text>
+          <Text color="#A0A0A0">{product?.description}</Text>
         </View>
         <View style={{ padding: 16 }}>
           <View>
@@ -376,6 +376,7 @@ export default function DetailProduct() {
             <TouchableOpacity
               onPress={() => {
                 if (item?.stock == state.qty) {
+                  showErrorToast('Stock Tidak Cukup.')
                   return
                 }
                 setState({ ...state, qty: parseInt(state.qty) + 1 })

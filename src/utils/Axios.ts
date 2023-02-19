@@ -8,14 +8,15 @@ import {refreshToken} from 'services/auth'
 import {setTokens} from 'store/actions/auth'
 
 const Axios = axios.create()
+let user = store.getState().auth.user
 
 Axios.interceptors.request.use(async config => {
   const token = await getToken()
 
   Object.assign(config, {
     // baseURL: constants.baseURL,
-    // baseURL: 'http://103.52.114.71',
-    baseURL: 'http://d785-180-254-69-129.ngrok.io',
+    baseURL: 'http://103.52.114.71',
+    // baseURL: 'http://75d5-180-254-69-129.ngrok.io',
     timeout: 1000 * 30,
     headers: {
       ...config.headers,
@@ -34,7 +35,7 @@ Axios.interceptors.response.use(
       ...err,
       message: err?.response?.data?.message || err?.message,
     }
-    if (err?.response?.status === 401) {
+    if (err?.response?.status === 401 && user != null) {
       logout()
     }
     return Promise.reject(error)

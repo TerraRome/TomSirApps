@@ -26,7 +26,7 @@ const ManageMerchant = ({ navigation, route }: any) => {
   const { user } = useSelector((state: any) => state.auth)
   const isAdmin = user?.role === 'admin'
 
-  const [link, setLink] = useState('TomsirApp/')
+  // const [link, setLink] = useState('TomsirApp/')
   const [merchant, setMerchant] = useState<any>({
     name: route?.params?.name || '',
     address: route?.params?.address || '',

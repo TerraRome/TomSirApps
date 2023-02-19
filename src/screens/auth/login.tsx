@@ -37,8 +37,8 @@ export default function Login({ navigation }: any) {
       if (data?.token) {
         dispatch(setAuth(data))
       }
-    } catch (error) {
-      showErrorToast(error?.response?.data?.message || error.message)
+    } catch (error: any) {
+      showErrorToast(error.message)
     } finally {
       setLoading(false)
     }
