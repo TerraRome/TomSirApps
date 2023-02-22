@@ -151,7 +151,7 @@ export default function DetailHistory() {
             <Text type="semibold">{moment(item?.createdAt).format('DD MMM YYYY HH:mm') || ' - '}</Text>
           </View>
           <View style={[styles.rowBetween, { marginVertical: 3 }]}>
-            <Text>Catatan</Text>
+            <Text>Customer</Text>
             <Text type="semibold">{item?.note || ' - '}</Text>
           </View>
           <View style={[styles.rowBetween, { marginVertical: 3 }]}>

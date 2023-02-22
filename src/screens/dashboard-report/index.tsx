@@ -1,27 +1,26 @@
-import React, { useState, useCallback, useEffect } from 'react'
-import { View, TouchableOpacity, FlatList, ActivityIndicator, Image, RefreshControl, Share } from 'react-native'
-import Text from '@components/Text'
-import { StyleSheet } from 'react-native'
-import Feather from 'react-native-vector-icons/Feather'
-import AntDesign from 'react-native-vector-icons/AntDesign'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import { useNavigation } from '@react-navigation/core'
-import { theme } from 'utils/theme'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { useDispatch, useSelector } from 'react-redux'
-import { convertToRupiah } from 'utils/convertRupiah'
-import { setReportHistory, setReportSummary } from 'store/actions/report'
-import { showErrorToast } from '@components/Toast'
-import TextInput from '@components/TextInput'
-import { getReportExcel, getReportList, getReportSummary, getReportKas, getReportRegis } from 'services/report'
-import { useIsFocused } from '@react-navigation/native'
 import CalendarPicker from '@components/CalendarPicker'
+import Loader from '@components/Loader'
+import Text from '@components/Text'
+import TextInput from '@components/TextInput'
+import { showErrorToast } from '@components/Toast'
+import { useNavigation } from '@react-navigation/core'
+import { useIsFocused } from '@react-navigation/native'
+import moment from 'moment'
+import React, { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, FlatList, Image, RefreshControl, Share, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import Feather from 'react-native-vector-icons/Feather'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { useDispatch, useSelector } from 'react-redux'
 import { getAllKas } from 'services/kas'
 import { getAllRegis } from 'services/registration'
-import moment from 'moment'
+import { getReportExcel, getReportKas, getReportList, getReportRegis, getReportSummary } from 'services/report'
+import { setReportHistory, setReportSummary } from 'store/actions/report'
+import { convertToRupiah } from 'utils/convertRupiah'
 import { downloadFile } from 'utils/fetch-blob'
-import Loader from '@components/Loader'
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { theme } from 'utils/theme'
 
 let searchDebounce: any = null
 export default function DashboardReport() {
@@ -330,13 +329,13 @@ export default function DashboardReport() {
           Tanggal : {moment(item?.createdAt).format('DD MMM YYYY HH:mm')}
         </Text>
         <Text style={styles.textInfo} size={7} color={theme.colors.label}>
-          Tipe Pesanan : {item?.type === 'dine_in' ? 'Dine In' : 'Take Away'}
+          Tipe Pesanan : {item?.type}
         </Text>
         <Text style={styles.textInfo} size={7} color={theme.colors.label}>
-          Harga Jual : {convertToRupiah(item?.total_price)}
+          Metode Pembayaran : {item?.payment_type}
         </Text>
         <Text style={styles.textInfo} size={7} color={theme.colors.label}>
-          Catatan : {item?.isWeb == 1 ? JSON.parse(item?.note).name || ' - ' : item?.note || ' - '}
+          Customer : {item?.isWeb == 1 ? JSON.parse(item?.note).name || ' - ' : item?.note || ' - '}
         </Text>
       </View>
     </TouchableOpacity>
