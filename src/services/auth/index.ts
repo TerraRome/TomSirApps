@@ -1,6 +1,5 @@
-import {AxiosResponse} from 'axios'
-import qs from 'query-string'
 import Axios from '@utils/Axios'
+import {AxiosResponse} from 'axios'
 
 export const signin = async (params: {
   email: string

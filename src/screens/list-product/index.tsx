@@ -260,6 +260,7 @@ export default function Home() {
     dispatch(getMerchantById())
     getRegis()
     refreshData()
+    getDataOrderList()
   }, [isFocused])
 
   return (

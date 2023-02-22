@@ -1,7 +1,7 @@
+import { useNavigation } from '@react-navigation/native'
+import { theme } from '@utils/theme'
 import React from 'react'
-import {StyleSheet, Modal, View, ActivityIndicator, Platform} from 'react-native'
-import {theme} from '@utils/theme'
-import {useNavigation} from '@react-navigation/native'
+import { ActivityIndicator, Modal, Platform, StyleSheet, View } from 'react-native'
 
 interface IProps {
   loading?: boolean
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0, 0.4)',
   },
   loader: {
-    transform: [{scale: Platform.OS === 'ios' ? 1 : 1.8}],
+    transform: [{ scale: Platform.OS === 'ios' ? 1 : 1.8 }],
   },
 })
 

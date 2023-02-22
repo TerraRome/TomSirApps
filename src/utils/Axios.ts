@@ -16,7 +16,7 @@ Axios.interceptors.request.use(async config => {
   Object.assign(config, {
     // baseURL: constants.baseURL,
     baseURL: 'http://103.52.114.71',
-    // baseURL: 'http://75d5-180-254-69-129.ngrok.io',
+    // baseURL: 'http://3dfb-180-254-69-129.ngrok.io',
     timeout: 1000 * 30,
     headers: {
       ...config.headers,

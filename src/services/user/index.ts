@@ -1,6 +1,6 @@
+import Axios from '@utils/Axios'
 import {AxiosResponse} from 'axios'
 import qs from 'query-string'
-import Axios from '@utils/Axios'
 
 interface IAddUser {
   fullname: string
@@ -27,6 +27,15 @@ export const addUser = async (data: IAddUser): Promise<AxiosResponse> => {
   })
 }
 
+export const regisUser = async (data: IAddUser): Promise<AxiosResponse> => {
+  return await Axios.post('api/v1/user/regis', data, {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
 export const getUsers = async (params: {
   page: string | number
   limit: string | number
@@ -37,7 +46,10 @@ export const getUsers = async (params: {
   return await Axios.get(`api/v1/user?${qs.stringify(params)}`)
 }
 
-export const editUser = async (id: string, data: IEditUser): Promise<AxiosResponse> => {
+export const editUser = async (
+  id: string,
+  data: IEditUser,
+): Promise<AxiosResponse> => {
   return await Axios.put(`api/v1/user/${id}`, data, {
     headers: {
       Accept: 'application/json',

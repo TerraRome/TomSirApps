@@ -1,7 +1,7 @@
 import {AxiosResponse} from 'axios'
 import qs from 'query-string'
-import Axios from 'utils/Axios'
 import {ImageSourcePropType} from 'react-native'
+import Axios from 'utils/Axios'
 interface IAddMerchant {
   name: string
   address: string
@@ -24,8 +24,21 @@ interface IEditMerchant {
   image: ImageSourcePropType
 }
 
-export const addMerchant = async (data: IAddMerchant): Promise<AxiosResponse> => {
+export const addMerchant = async (
+  data: IAddMerchant,
+): Promise<AxiosResponse> => {
   return await Axios.post('api/v1/merchant', data, {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}
+
+export const regisMerchant = async (
+  data: IAddMerchant,
+): Promise<AxiosResponse> => {
+  return await Axios.post('api/v1/merchant/regis', data, {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'multipart/form-data',
@@ -42,7 +55,10 @@ export const getMerchants = async (params: {
   return await Axios.get(`api/v1/merchant?${qs.stringify(params)}`)
 }
 
-export const editMerchants = async (id: string, data: IEditMerchant): Promise<AxiosResponse> => {
+export const editMerchants = async (
+  id: string,
+  data: IEditMerchant,
+): Promise<AxiosResponse> => {
   return await Axios.put(`api/v1/merchant/${id}`, data, {
     headers: {
       Accept: 'application/json',
@@ -51,6 +67,8 @@ export const editMerchants = async (id: string, data: IEditMerchant): Promise<Ax
   })
 }
 
-export const getMerchantId = async (merchantId: string): Promise<AxiosResponse> => {
+export const getMerchantId = async (
+  merchantId: string,
+): Promise<AxiosResponse> => {
   return await Axios.get(`api/v1/merchant/${merchantId}`)
 }

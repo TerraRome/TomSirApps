@@ -7,7 +7,7 @@ import { theme } from '@utils/theme'
 import { emailValidator, passwordValidator } from '@utils/validators'
 import Logo from 'components/Logo'
 import React, { useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import { useDispatch } from 'react-redux'
 import { signin } from 'services/auth'
@@ -71,12 +71,12 @@ export default function Login({ navigation }: any) {
               {isLoading ? 'Memuat...' : 'Log In'}
             </Text>
           </Button>
-          {/* <View style={[styles.row, { alignSelf: 'center' }]}>
+          <View style={[styles.row, { alignSelf: 'center' }]}>
             <Text style={styles.label}>Tidak punya akun? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
               <Text style={styles.link}>Register</Text>
             </TouchableOpacity>
-          </View> */}
+          </View>
         </KeyboardAvoidingView>
       </ScrollView>
     </View>
