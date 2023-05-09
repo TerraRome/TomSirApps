@@ -1,15 +1,16 @@
-import React, { useState } from 'react'
-import { View, StyleSheet, Alert } from 'react-native'
-import CheckBox from '@react-native-community/checkbox'
-import Text from '@components/Text'
-import { moneyFormat, convertToAngka } from '@utils/convertRupiah'
-import { theme } from '@utils/theme'
-import moment from 'moment'
-import TextInput from '@components/TextInput'
 import CustomButton from '@components/Button'
-import { useSelector, useDispatch } from 'react-redux'
-import { showErrorToast, showSuccessToast } from 'components/Toast'
+import Text from '@components/Text'
+import TextInput from '@components/TextInput'
+import CheckBox from '@react-native-community/checkbox'
 import { addRegistration } from '@services/registration'
+import { convertToAngka, moneyFormat } from '@utils/convertRupiah'
+import { theme } from '@utils/theme'
+import { showErrorToast, showSuccessToast } from 'components/Toast'
+import moment from 'moment'
+import React, { useState } from 'react'
+import { StyleSheet, View } from 'react-native'
+import { useSelector } from 'react-redux'
+import { debounce } from 'utils/debounce'
 
 const AddAddonMenu = ({ navigation, route }: any) => {
   const isEdit = route?.params?.isEdit || false
@@ -48,7 +49,7 @@ const AddAddonMenu = ({ navigation, route }: any) => {
           routes: [{ name: 'DrawerNavigator' }],
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       showErrorToast(error.message)
     }
   }
@@ -88,7 +89,7 @@ const AddAddonMenu = ({ navigation, route }: any) => {
         <Text style={styles.inputTitle}>Tanpa Modal</Text>
       </View>
       <View style={styles.buttonWrapper}>
-        <CustomButton mode="default" onPress={onSave} loading={!addonMenu.modal && !addonMenu.isActive}>
+        <CustomButton mode="default" onPress={debounce(onSave)} loading={!addonMenu.modal && !addonMenu.isActive}>
           <Text style={styles.buttonText}>SIMPAN</Text>
         </CustomButton>
       </View>

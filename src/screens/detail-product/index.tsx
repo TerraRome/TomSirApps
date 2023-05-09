@@ -31,6 +31,7 @@ import { changeCartItem, removeCartItem } from 'store/actions/carts'
 import { convertToRupiah } from 'utils/convertRupiah'
 //@ts-ignore
 import { RadioButtonInput } from 'react-native-simple-radio-button'
+import { debounce } from 'utils/debounce'
 
 export default function DetailProduct() {
   const dispatch = useDispatch()
@@ -398,7 +399,7 @@ export default function DetailProduct() {
       </ScrollView>
       <WrapFooterButton>
         {state?.qty > 0 ? (
-          <Button onPress={onPressAddToCart}>
+          <Button onPress={debounce(onPressAddToCart)}>
             <Text color="white" type="semibold">
               {cart ? 'Perbarui isi' : 'Tambah ke'} Keranjang - {total && convertToRupiah(total)}
             </Text>
