@@ -15,8 +15,8 @@ Axios.interceptors.request.use(async config => {
 
   Object.assign(config, {
     // baseURL: constants.baseURL,
-    baseURL: 'http://103.52.114.71',
-    // baseURL: 'http://3dfb-180-254-69-129.ngrok.io',
+    baseURL: 'http://rpos.ayobikin.web.id/',
+    // baseURL: 'http://9a9d-180-254-76-114.ngrok-free.app',
     timeout: 1000 * 30,
     headers: {
       ...config.headers,
@@ -26,8 +26,15 @@ Axios.interceptors.request.use(async config => {
   return config
 })
 
+const sleep = (delay: any) => {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, delay)
+  })
+}
+
 Axios.interceptors.response.use(
-  response => {
+  async response => {
+    await sleep(3000)
     return response
   },
   err => {

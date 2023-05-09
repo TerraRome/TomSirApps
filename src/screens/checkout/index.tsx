@@ -351,17 +351,12 @@ export default function CheckOut() {
               onChangeText={val => setNoteDineIn(val)}
             />
             <TextInput
-              isNumber={true}
+              isNumber
               style={{ height: 45, width: "45%", fontSize: 10 }}
               placeholder="Nomor Whatsapp"
               value={phone_number}
               onChangeText={val =>
-                customer.map((e: any) => {
-                  if (val == e.phone_number) {
-                    setNoteDineIn(e.name)
-                  }
-                  setPhone_number(val)
-                })
+                setPhone_number(val)
               }
             />
           </View>
@@ -493,17 +488,17 @@ export default function CheckOut() {
         <View style={styles.rowBetween}>
           {!isPendingOrder || isPendingOrderChange ? (
             <Button
-              loading={noteDineIn == '' || phone_number == '' || typeOrder == '' || isLoading}
+              loading={noteDineIn == '' || typeOrder == '' || phone_number == '' || isLoading}
               style={{ flex: 1, marginRight: 18, paddingHorizontal: 0, alignItems: 'center' }}
               mode="outlined"
               onPress={handleSaveChange}>
-              <Text type="bold" color={noteDineIn == '' || phone_number == '' || typeOrder == '' ? theme.colors.disabled : theme.colors.primary}>
+              <Text type="bold" color={noteDineIn == '' || typeOrder == '' || phone_number == '' ? theme.colors.disabled : theme.colors.primary}>
                 Simpan Pesanan
               </Text>
             </Button>
           ) : null}
           <Button
-            loading={noteDineIn == '' || phone_number == '' || typeOrder == '' || isLoading}
+            loading={noteDineIn == '' || typeOrder == '' || phone_number == '' || isLoading}
             style={{ flex: 1, paddingHorizontal: 0, alignItems: 'center' }}
             onPress={async () => {
               if (isPendingOrderChange) {

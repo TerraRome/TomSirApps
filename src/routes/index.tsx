@@ -51,7 +51,7 @@ function Routes() {
 
   const defaultStyle = {
     fontFamily: 'Jost-SemiBold',
-    fontSize: 20,
+    fontSize: 18,
   }
 
   const hideShadow = {
