@@ -94,7 +94,7 @@ function CustomDrawerContent(props: any) {
   const { user, merchant } = useSelector((state: any) => state.auth)
   const superAdmin = user?.role === 'superadmin'
   return (
-    <DrawerContentScrollView {...props}>
+    <DrawerContentScrollView {...props} style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={styles.content}>
           {superAdmin ? (
@@ -148,6 +148,9 @@ function CustomDrawerContent(props: any) {
           }}
         />
       </View>
+      <Text type="regular" size={6} style={styles.footerVersion}>
+        V.1.0.4
+      </Text>
     </DrawerContentScrollView>
   )
 }
@@ -212,4 +215,8 @@ const styles = StyleSheet.create({
   labelSpace: {
     marginLeft: -16,
   },
+  footerVersion: {
+    alignSelf: 'center',
+    fontWeight: 'bold',
+  }
 })
